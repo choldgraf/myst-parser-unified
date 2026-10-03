@@ -383,5 +383,17 @@
   "commonmark.paragraphs: CommomMark two paragraphs",
   "commonmark.paragraphs: CommonMark inline styling",
   "commonmark.quotes: CommonMark blockquote",
-  "footnotes: Basic footnotes"
+  "footnotes: Basic footnotes",
+  "references.figures: Invalid figure reference without value",
+  "references.figures: Invalid figure reference",
+  "references.figures: Invalid figure reference with messy label",
+  "roles.generic: unknown role",
+  "roles.html.abbr: Inline Abbreviation",
+  "roles.html.abbr: Abbreviation Without Title",
+  "roles.html.abbr: Abbreviation with poor brackets",
+  "roles.html: Subscript",
+  "roles.html: Subscript spelled out",
+  "roles.html: Superscript",
+  "roles.html: Superscript spelled out",
+  "roles.math: Math role"
 ]

@@ -25,16 +25,23 @@
     "micromark-extension-gfm-footnote": "^2.1.0",
     "micromark-extension-gfm-table": "^2.1.2",
     "micromark-extension-gfm-task-list-item": "^2.1.0",
-    "micromark-extension-math": "^3.1.0"
+    "micromark-extension-math": "^3.1.0",
+    "micromark-factory-space": "^2.1.0",
+    "micromark-util-character": "^2.1.1",
+    "micromark-util-symbol": "^2.0.1"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
     "@types/mdast": "^4.0.4",
     "@types/node": "^26.6.3",
     "js-yaml": "^5.4.2",
+    "micromark-util-types": "^2.0.3",
+    "myst-parser": "1.7.4",
+    "myst-roles": "^1.7.4",
     "myst-spec": "^0.0.6",
     "typescript": "^7.0.2",
     "unist-util-visit": "^5.1.0",
+    "vfile": "^6.0.3",
     "vitest": "^5.0.2"
   }
 }

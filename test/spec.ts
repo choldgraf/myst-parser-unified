@@ -4,6 +4,10 @@ import { createRequire } from 'node:module';
 import { isDeepStrictEqual } from 'node:util';
 import { load } from 'js-yaml';
 import type { Root } from 'mdast';
+import { defaultRoles } from 'myst-roles';
+// myst-parser doesn't export applyRoles, so import its file directly (pinned to 1.7.4 for this)
+import { applyRoles } from '../node_modules/myst-parser/dist/roles.js';
+import { VFile } from 'vfile';
 import { visit } from 'unist-util-visit';
 import { parse } from '../src/parse.ts';
 
@@ -46,7 +50,10 @@ export function normalize(tree: Root): Root {
 
 /** Compare our tree with the mdast that the spec example expects */
 export function compare({ src, mdast }: Case) {
-  const ours = normalize(parse(src));
+  const tree = parse(src);
+  // The spec expects the tree after roles run, so run mystmd's (its types are older, hence `any`)
+  applyRoles(tree as any, defaultRoles, new VFile() as any);
+  const ours = normalize(tree);
   const reference = normalize(mdast);
   return { ours, reference, match: isDeepStrictEqual(ours, reference) };
 }

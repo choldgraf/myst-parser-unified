@@ -6,5 +6,6 @@ project:
   toc:
     - file: index.md
     - file: phase-1.md
+    - file: phase-2.md
 site:
   template: book-theme

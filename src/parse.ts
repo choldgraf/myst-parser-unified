@@ -10,17 +10,19 @@ import { gfmFootnote } from 'micromark-extension-gfm-footnote';
 import { gfmTable } from 'micromark-extension-gfm-table';
 import { gfmTaskListItem } from 'micromark-extension-gfm-task-list-item';
 import { math } from 'micromark-extension-math';
+import { role, roleFromMarkdown } from './roles.ts';
 
 /** Parse MyST markdown to mdast */
 export function parse(src: string): Root {
   return fromMarkdown(src, {
-    extensions: [frontmatter(), gfmFootnote(), gfmTable(), gfmTaskListItem(), math()],
+    extensions: [frontmatter(), gfmFootnote(), gfmTable(), gfmTaskListItem(), math(), role()],
     mdastExtensions: [
       frontmatterFromMarkdown(),
       gfmFootnoteFromMarkdown(),
       gfmTableFromMarkdown(),
       gfmTaskListItemFromMarkdown(),
       mathFromMarkdown(),
+      roleFromMarkdown(),
     ],
   });
 }
