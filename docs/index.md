@@ -2,7 +2,7 @@
 
 A proof of concept for parsing MyST Markdown with micromark and unified ([jupyter-book/mystmd#1705](https://github.com/jupyter-book/mystmd/issues/1705)).
 
-We compare our output with mystmd's markdown-it parser on every `myst-spec` example, before directives and roles run.
+We compare our output with the `mdast` that each `myst-spec` example expects.
 An example passes when both parsers give the same tree.
 
 ## Run it

@@ -1,4 +1,4 @@
-// Compare our parser with mystmd's on every myst-spec example.
+// Compare our parser with the expected mdast in every myst-spec example.
 //   npm run score                 score per file, and update scoreboard.json and docs/data/
 //   npm run score -- "<search>"   show why examples whose id contains <search> don't match
 import assert from 'node:assert';
@@ -9,13 +9,13 @@ const search = process.argv[2];
 const cases = loadCases();
 
 if (search !== undefined) {
-  const failing = cases.filter((c) => c.id.includes(search) && !compare(c.src).match);
-  for (const { id, src } of failing.slice(0, 3)) {
-    const { ours, reference } = compare(src);
+  const failing = cases.filter((c) => c.id.includes(search) && !compare(c).match);
+  for (const c of failing.slice(0, 3)) {
+    const { ours, reference } = compare(c);
     try {
       assert.deepStrictEqual(ours, reference);
     } catch (error) {
-      console.log(`## ${id}\n\n${src}\n${(error as Error).message}\n`);
+      console.log(`## ${c.id}\n\n${c.src}\n${(error as Error).message}\n`);
     }
   }
   console.log(`${failing.length} failing examples match "${search}"`);
@@ -24,11 +24,12 @@ if (search !== undefined) {
   const byFile = new Map<string, { pass: number; total: number }>();
   // Failing examples, grouped by where they first differ (quoted values and child counts removed)
   const differences = new Map<string, { count: number; example: string }>();
-  for (const { id, src } of cases) {
+  for (const c of cases) {
+    const { id } = c;
     const file = id.split(':')[0];
     const counts = byFile.get(file) ?? { pass: 0, total: 0 };
     counts.total++;
-    const { ours, reference, match } = compare(src);
+    const { ours, reference, match } = compare(c);
     if (match) {
       counts.pass++;
       passing.push(id);

@@ -4,58 +4,50 @@ import { createRequire } from 'node:module';
 import { isDeepStrictEqual } from 'node:util';
 import { load } from 'js-yaml';
 import type { Root } from 'mdast';
-import { createTokenizer, tokensToMyst } from 'myst-parser';
 import { visit } from 'unist-util-visit';
 import { parse } from '../src/parse.ts';
 
-export type Case = { id: string; src: string };
+export type Case = { id: string; src: string; mdast: Root };
 
 const specPackage = createRequire(import.meta.url).resolve('myst-spec/package.json');
 const examples = path.join(path.dirname(specPackage), 'dist', 'examples');
 
-/** Every myst-spec example that has MyST source, with an id like `roles.generic: Basic role` */
+/** Every myst-spec example that has MyST source and isn't skipped, with an id like `roles.generic: Basic role` */
 export function loadCases(): Case[] {
   return fs
     .readdirSync(examples)
     .filter((file) => file.endsWith('.yml'))
     .flatMap((file) => {
       const { cases } = load(fs.readFileSync(path.join(examples, file), 'utf8')) as {
-        cases: { title: string; myst?: string }[];
+        cases: { title: string; myst?: string; mdast: Root; skip?: boolean }[];
       };
       return cases
-        .filter((c) => c.myst)
-        .map((c) => ({ id: `${file.replace('.yml', '')}: ${c.title}`, src: c.myst! }));
+        .filter((c) => c.myst && !c.skip)
+        .map((c) => ({ id: `${file.replace('.yml', '')}: ${c.title}`, src: c.myst!, mdast: c.mdast }));
     });
-}
-
-const tokenizer = createTokenizer();
-
-/** mystmd's tree from markdown-it, before directives and roles are applied */
-export function referenceTree(src: string): Root {
-  // myst-parser uses older mdast types, but the tree is the same plain JSON
-  return tokensToMyst(src, tokenizer.parse(src, {})) as unknown as Root;
 }
 
 /**
  * Remove differences we don't care about (yet).
- * Every rule here is a known difference between the parsers, so say why.
+ * Every rule here is a known difference from the spec, so say why.
  */
 export function normalize(tree: Root): Root {
   // JSON round trip: a deep copy that also drops `undefined` fields
   const copy = JSON.parse(JSON.stringify(tree));
   visit(copy, (node: any) => {
-    // markdown-it has no columns (mystmd#2864), so compare positions separately
+    // The spec has no positions, so test/parse.test.ts checks ours
     delete node.position;
-    // mdast sets these to null where markdown-it leaves them out
+    // mdast sets these to null where the spec leaves them out
     if (node.start === null) delete node.start;
     if (node.checked === null) delete node.checked;
   });
   return copy;
 }
 
-export function compare(src: string) {
+/** Compare our tree with the mdast that the spec example expects */
+export function compare({ src, mdast }: Case) {
   const ours = normalize(parse(src));
-  const reference = normalize(referenceTree(src));
+  const reference = normalize(mdast);
   return { ours, reference, match: isDeepStrictEqual(ours, reference) };
 }
 
