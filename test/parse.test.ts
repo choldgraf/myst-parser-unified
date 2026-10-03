@@ -21,15 +21,6 @@ test('role bodies are parsed in place, with exact positions', () => {
   expect(text).toMatchObject({ value: '\n3', position: { end: { line: 2, column: 4, offset: 16 } } });
 });
 
-// The spec only has simple roles, so compare these with mystmd's parser, before roles run
-const roles = ['{sub}``a`b``', '{sub}`` a`b ``', '{sub}`a\nb`', '{sub}`*x* **y**`', '{sub}`{sup}``z```', '\\{sub}`2`', '{sub}`2', '{sub} `2`', '{}`x`', '`{sub}`x`', '{sub}`x``'];
-const tokenizer = createTokenizer();
-
-test.each(roles)('role syntax matches mystmd: %j', (src) => {
-  const reference = tokensToMyst(src, tokenizer.parse(src, {})) as any;
-  expect(normalize(parse(src))).toEqual(normalize(reference));
-});
-
 test('directive arguments, options and bodies are parsed in place, with exact positions', () => {
   const directive = (parse('> ```{note} An *arg*\n> :class: tip\n>\n> Body *text*\n> ```').children[0] as any).children[0];
   expect(directive).toMatchObject({ type: 'mystDirective', name: 'note', args: 'An *arg*', options: { class: 'tip' } });
@@ -40,8 +31,22 @@ test('directive arguments, options and bodies are parsed in place, with exact po
   expect(body.children[0].children[1].position.start).toEqual({ line: 4, column: 8, offset: 44 });
 });
 
-// The spec only has simple directives, so compare these with mystmd's parser, before directives run
-const directives = [
+// The spec only has simple MyST syntax, so compare these edge cases with mystmd's parser,
+// before directives and roles run
+const syntax = [
+  // Roles
+  '{sub}``a`b``',
+  '{sub}`` a`b ``',
+  '{sub}`a\nb`',
+  '{sub}`*x* **y**`',
+  '{sub}`{sup}``z```',
+  '\\{sub}`2`',
+  '{sub}`2',
+  '{sub} `2`',
+  '{}`x`',
+  '`{sub}`x`',
+  '{sub}`x``',
+  // Directives
   '~~~{note}\nX\n~~~',
   ':::{note} Arg\n:class: a\n\nBody\n:::',
   '````{a}\n```{b}\nX\n```\n````',
@@ -55,15 +60,7 @@ const directives = [
   '```{note}\n```',
   '  ```{note}\n   X\n\n    Y\n  ```',
   '```{code} python\n# not a heading\n```',
-];
-
-test.each(directives)('directive syntax matches mystmd: %j', (src) => {
-  const reference = tokensToMyst(src, tokenizer.parse(src, {})) as any;
-  expect(normalize(parse(src))).toEqual(normalize(reference));
-});
-
-// The spec only has simple targets, comments and block breaks, so compare these with mystmd's parser
-const blockSyntax = [
+  // Targets, comments and block breaks
   '% hi  \n%there\nPara',
   '% a\n\n% b',
   'x\n% c\n  % d\ny',
@@ -76,8 +73,9 @@ const blockSyntax = [
   '(bad label)=',
   '(x)= y',
 ];
+const tokenizer = createTokenizer();
 
-test.each(blockSyntax)('block syntax matches mystmd: %j', (src) => {
+test.each(syntax)('syntax matches mystmd: %j', (src) => {
   // mystmd puts the content between block breaks in `block` nodes by default, and the spec doesn't
   const reference = tokensToMyst(src, tokenizer.parse(src, {}), { nestBlocks: false } as any) as any;
   expect(normalize(parse(src))).toEqual(normalize(reference));

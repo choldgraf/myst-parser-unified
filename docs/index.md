@@ -1,22 +1,15 @@
-# myst-parser-unified
+---
+title: myst-parser-unified
+---
 
-A proof of concept for parsing MyST Markdown with micromark and unified ([jupyter-book/mystmd#1705](https://github.com/jupyter-book/mystmd/issues/1705)).
-
-We compare our output with the `mdast` that each `myst-spec` example expects.
-An example passes when both parsers give the same tree.
-
-## Run it
-
-- `npm run score`: score each example file, and write `scoreboard.json` and the data for this site.
-- `npm run score -- "<example id>"`: show why examples don't match.
-- `npm run docs`: score, then build this site.
-- `npm run docs:live`: score, then serve this site locally.
-
-The numbers on this site come from the last `npm run score`.
+```{include} ../README.md
+:start-line: 2
+```
 
 ## Score per file
 
 Each row is a `myst-spec` example file, and the last row is the total.
+The numbers come from the last `npm run score`.
 
 :::{listing}
 :source: json

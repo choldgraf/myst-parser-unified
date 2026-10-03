@@ -1,7 +1,6 @@
 {
   "name": "myst-parser-unified",
-  "version": "1.0.0",
-  "description": "",
+  "description": "A proof of concept for parsing MyST Markdown with micromark and unified",
   "scripts": {
     "test": "vitest run",
     "score": "node scripts/score.ts",
@@ -9,9 +8,6 @@
     "docs:live": "npm run score && cd docs && myst start",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "type": "module",
   "private": true,
   "dependencies": {

@@ -26,6 +26,7 @@ Run `npm run score -- "<example>"` to see the full diff for an example.
 ## How the tree is represented
 
 These differences need a small transform or a `normalize()` rule each, and a decision on which tree is "right".
+[mystmd#3078](https://github.com/jupyter-book/mystmd/issues/3078) proposes fixing the spec's side of them.
 
 - **Null or empty fields** (`lang: null vs "…"`, `title: extra in ours`) are the largest group.
   mdast writes `title: null`, `lang: null`, `meta: null` and `align: [null]`, where the spec leaves them out or uses `lang: ""`.
@@ -46,12 +47,7 @@ These differences need a small transform or a `normalize()` rule each, and a dec
 
 Reference links, code `meta`, and `spread` are cases where mdast's tree is arguably better than the spec's.
 
-## MyST syntax we don't parse yet
+## MyST syntax
 
-- **Backtick directives** (`type code vs mystDirective`): a directive in the spec, a `code` block in ours.
-  The spec expects the tree *after* the directive runs, so we'll also need mystmd's directives to match it.
-- **Roles** (`type text vs mystRole`, and `text(text).value` rows like `see {ref}`): `{name}` followed by inline code.
-- **Targets** `(label)=`, **comments** `%`, and **block breaks** `+++` (`type paragraph vs mystTarget`, `mystComment` or `blockBreak`): none of their examples pass yet.
-- **Colon fences**: `myst-spec` has no examples for them yet.
-
-MyST syntax is the real work, which is what Phases 2–4 test.
+None of the MyST syntax was parsed in this phase.
+The later phases add roles, directives (including colon fences), targets, comments and block breaks.

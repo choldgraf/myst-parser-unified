@@ -45,5 +45,3 @@ No spec example uses these, but mystmd's parser accepts them:
 - names with spaces, like `` {a b}`2` ``, which mystmd turns into a `mystRoleError`.
 
 `micromark-extension-directive` already parses `{#id .class key=value}` attributes, so it's a good place to start for inline options.
-
-The `references.*` examples that still fail do so because of backtick directives and targets, not roles.

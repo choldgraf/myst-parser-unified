@@ -41,7 +41,7 @@ Almost all of the `directives.*` examples now match (see the score table on the 
 - `{list-table}` cells: the spec expects items in tight lists to hold text directly, with no paragraph.
   mystmd's spec test turns `listItemParagraphs` off to get this, and the same goes for every tight list in the spec.
   mdast always wraps list item content in a paragraph, so we leave these failing.
-- `references.*` examples fail because of targets like `(label)=`, and reference-style links.
+- The other directive and `references.*` examples that fail do so because of tree differences from [Phase 1](./phase-1.md), like `title: null` on links.
 
 ## Not supported yet
 
