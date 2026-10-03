@@ -1,13 +1,16 @@
 version: 1
 project:
   title: myst-parser-unified
+  github: https://github.com/choldgraf/myst-parser-unified
   plugins:
     - https://github.com/myst-contrib/myst-listing/releases/latest/download/plugin.mjs
+    # Points relative links in the included README at the right place
+    - https://github.com/myst-contrib/myst-include-link-rewrites/releases/latest/download/index.mjs
+    # Adds titles and open/closed badges to GitHub issue links
+    - https://github.com/myst-contrib/myst-github/releases/latest/download/index.mjs
   toc:
     - file: index.md
-    - file: phase-1.md
-    - file: phase-2.md
-    - file: phase-3.md
-    - file: phase-5.md
+    - file: how-it-works.md
+    - file: differences.md
 site:
   template: book-theme

@@ -17,5 +17,3 @@ The numbers come from the last `npm run score`.
 :columns: title,pass,total
 :limit: 0
 :::
-
-See [](./phase-1.md) for why examples don't match.
