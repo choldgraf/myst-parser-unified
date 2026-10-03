@@ -1,10 +1,11 @@
 // MyST targets `(label)=`, comments `% text` and block breaks `+++`, as micromark extensions.
 // Each one is a line of its own, and can interrupt a paragraph.
-import type { CompileContext, Extension as FromMarkdownExtension, Token } from 'mdast-util-from-markdown';
+import type { Extension as FromMarkdownExtension } from 'mdast-util-from-markdown';
 import { factorySpace } from 'micromark-factory-space';
-import { markdownLineEnding, markdownSpace } from 'micromark-util-character';
+import { markdownSpace } from 'micromark-util-character';
 import { codes, types } from 'micromark-util-symbol';
-import type { Code, Construct, Effects, Extension, State, TokenizeContext } from 'micromark-util-types';
+import type { Code, Construct, Effects, Extension, State } from 'micromark-util-types';
+import { atLineEnd, current, exit, nonLazyLine } from './shared.ts';
 
 declare module 'micromark-util-types' {
   interface TokenTypeMap {
@@ -30,8 +31,6 @@ export function blocks(): Extension {
     },
   };
 }
-
-const atLineEnd = (code: Code) => code === codes.eof || markdownLineEnding(code);
 
 const labelChar = /[a-zA-Z0-9|@<>*./_\-+:]/;
 const isLabelChar = (code: Code) => code !== null && code > 0 && labelChar.test(String.fromCharCode(code));
@@ -108,25 +107,9 @@ function tokenizeComment(effects: Effects, ok: State, nok: State): State {
 }
 
 // A line ending, then a line (that isn't a lazy paragraph line) starting with `%`, with any indent
-function tokenizeNextCommentLine(this: TokenizeContext, effects: Effects, ok: State, nok: State): State {
-  const self = this;
-  return start;
-
-  function start(code: Code) {
-    effects.enter(types.lineEnding);
-    effects.consume(code);
-    effects.exit(types.lineEnding);
-    return lineStart;
-  }
-
-  function lineStart(code: Code) {
-    if (self.parser.lazy[self.now().line]) return nok(code);
-    return factorySpace(effects, percent, types.linePrefix)(code);
-  }
-
-  function percent(code: Code) {
-    return code === codes.percentSign ? ok(code) : nok(code);
-  }
+function tokenizeNextCommentLine(effects: Effects, ok: State, nok: State): State {
+  const percent = (code: Code) => (code === codes.percentSign ? ok(code) : nok(code));
+  return effects.attempt(nonLazyLine, factorySpace(effects, percent, types.linePrefix), nok);
 }
 
 // `+++`, with optional spaces between the `+` and metadata after them, like `+++ {"a": 1}`
@@ -197,10 +180,4 @@ export function blocksFromMarkdown(): FromMarkdownExtension {
       mystBlockBreak: exit,
     },
   };
-}
-
-const current = (context: CompileContext) => context.stack[context.stack.length - 1] as any;
-
-function exit(this: CompileContext, token: Token) {
-  this.exit(token);
 }

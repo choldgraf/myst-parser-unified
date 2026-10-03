@@ -14,7 +14,7 @@ import type {
   TokenizeContext,
   Token as MicromarkToken,
 } from 'micromark-util-types';
-import { isNameChar } from './roles.ts';
+import { atLineEnd, current, exit, isNameChar, nonLazyLine } from './shared.ts';
 
 declare module 'micromark-util-types' {
   interface TokenTypeMap {
@@ -39,7 +39,6 @@ export function directive(): Extension {
   return { flow: { [codes.graveAccent]: construct, [codes.tilde]: construct, [codes.colon]: construct } };
 }
 
-const nonLazyLine: Construct = { tokenize: tokenizeNonLazyLine, partial: true };
 const option: Construct = { tokenize: tokenizeOption, partial: true };
 
 function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, nok: State): State {
@@ -105,14 +104,14 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
 
   // The rest of the opening line is the argument, parsed as inline markdown
   function argStart(code: Code) {
-    if (code === codes.eof || markdownLineEnding(code)) return openEnd(code);
+    if (atLineEnd(code)) return openEnd(code);
     effects.enter('mystDirectiveArg');
     effects.enter(types.chunkText, { contentType: constants.contentTypeText });
     return arg(code);
   }
 
   function arg(code: Code): State | undefined {
-    if (code === codes.eof || markdownLineEnding(code)) {
+    if (atLineEnd(code)) {
       effects.exit(types.chunkText);
       effects.exit('mystDirectiveArg');
       return openEnd(code);
@@ -236,7 +235,7 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
     }
 
     function closeEnd(code: Code) {
-      if (code !== codes.eof && !markdownLineEnding(code)) return nok(code);
+      if (!atLineEnd(code)) return nok(code);
       effects.exit('mystDirectiveFence');
       return ok(code);
     }
@@ -276,14 +275,14 @@ function tokenizeOption(effects: Effects, ok: State, nok: State): State {
   }
 
   function valueStart(code: Code) {
-    if (code === codes.eof || markdownLineEnding(code)) return end(code);
+    if (atLineEnd(code)) return end(code);
     effects.enter('mystOptionValue');
     effects.enter(types.chunkText, { contentType: constants.contentTypeText });
     return value(code);
   }
 
   function value(code: Code): State | undefined {
-    if (code === codes.eof || markdownLineEnding(code)) {
+    if (atLineEnd(code)) {
       effects.exit(types.chunkText);
       effects.exit('mystOptionValue');
       return end(code);
@@ -295,23 +294,6 @@ function tokenizeOption(effects: Effects, ok: State, nok: State): State {
   function end(code: Code) {
     effects.exit('mystOption');
     return ok(code);
-  }
-}
-
-// A line ending, followed by a line that isn't a lazy continuation of a paragraph
-function tokenizeNonLazyLine(this: TokenizeContext, effects: Effects, ok: State, nok: State): State {
-  const self = this;
-  return start;
-
-  function start(code: Code) {
-    effects.enter(types.lineEnding);
-    effects.consume(code);
-    effects.exit(types.lineEnding);
-    return lineStart;
-  }
-
-  function lineStart(code: Code) {
-    return self.parser.lazy[self.now().line] ? nok(code) : ok(code);
   }
 }
 
@@ -367,12 +349,6 @@ export function directiveFromMarkdown(): FromMarkdownExtension {
       },
     },
   };
-}
-
-const current = (context: CompileContext) => context.stack[context.stack.length - 1] as any;
-
-function exit(this: CompileContext, token: Token) {
-  this.exit(token);
 }
 
 // Also collect options on the directive, like mystmd: `class` values add up, otherwise the first one wins

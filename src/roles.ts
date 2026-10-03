@@ -1,11 +1,12 @@
 // MyST roles, like {sub}`2`, as a micromark extension.
 // The body between the backticks is parsed as inline markdown by micromark itself,
 // so its nodes get exact positions.
-import type { CompileContext, Extension as FromMarkdownExtension, Token } from 'mdast-util-from-markdown';
+import type { Extension as FromMarkdownExtension } from 'mdast-util-from-markdown';
 import { factorySpace } from 'micromark-factory-space';
 import { markdownLineEnding } from 'micromark-util-character';
 import { codes, constants, types } from 'micromark-util-symbol';
 import type { Code, Construct, Effects, Extension, State, Token as MicromarkToken } from 'micromark-util-types';
+import { current, exit, isNameChar } from './shared.ts';
 
 declare module 'micromark-util-types' {
   interface TokenTypeMap {
@@ -21,9 +22,6 @@ declare module 'micromark-util-types' {
 export function role(): Extension {
   return { text: { [codes.leftCurlyBrace]: { name: 'mystRole', tokenize: tokenizeRole } } };
 }
-
-const nameChar = /[a-zA-Z0-9_.\-+:]/;
-export const isNameChar = (code: Code) => code !== null && code > 0 && nameChar.test(String.fromCharCode(code));
 
 function tokenizeRole(effects: Effects, ok: State, nok: State): State {
   let fenceSize = 0;
@@ -180,10 +178,4 @@ export function roleFromMarkdown(): FromMarkdownExtension {
       mystRoleBody: exit,
     },
   };
-}
-
-const current = (context: CompileContext) => context.stack[context.stack.length - 1] as any;
-
-function exit(this: CompileContext, token: Token) {
-  this.exit(token);
 }
