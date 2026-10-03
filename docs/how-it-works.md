@@ -50,20 +50,6 @@ The tokenizer is modeled on the `:::name` containers in [`micromark-extension-di
 
 Like a heading, each one can come right after a line of text, without a blank line between.
 
-## Scoring
-
-mystmd handles directives and roles in two steps.
-First its parser builds a generic `mystDirective` or `mystRole` node, and our handlers build the same nodes.
-Then mystmd *runs* each one, which replaces it with real content, like an `admonition` node for `{note}`.
-
-The spec expects the tree after that second step.
-So [`test/spec.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/spec.ts) runs mystmd's own `applyDirectives` and `applyRoles` on our tree before comparing.
-These come from `myst-parser`, mystmd's parser package, which doesn't export them.
-So we import their files by path, and pin `myst-parser` to an exact version in case those paths change.
-
-`normalize()` in `test/spec.ts` removes a few differences we accept, with a comment on each.
-The differences that remain make examples fail, and they're explained in [](./differences.md).
-
 ## Notes on micromark
 
 - micromark's API is low level. We learned it by copying patterns from micromark's own constructs and from `micromark-extension-directive`.

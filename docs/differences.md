@@ -5,6 +5,20 @@ mystmd parses with markdown-it, and the spec records many of markdown-it's habit
 Our tree follows [mdast](https://github.com/syntax-tree/mdast) instead.
 [mystmd#3078](https://github.com/jupyter-book/mystmd/issues/3078) proposes fixing these in the spec.
 
+## How examples are compared
+
+mystmd handles directives and roles in two steps.
+First its parser builds a generic `mystDirective` or `mystRole` node, and our handlers build the same nodes.
+Then mystmd *runs* each one, which replaces it with real content, like an `admonition` node for `{note}`.
+
+The spec expects the tree after that second step.
+So [`test/spec.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/spec.ts) runs mystmd's own `applyDirectives` and `applyRoles` on our tree before comparing.
+These come from `myst-parser`, mystmd's parser package, which doesn't export them.
+So we import their files by path, and pin `myst-parser` to an exact version in case those paths change.
+
+`normalize()` in `test/spec.ts` removes a few differences we accept, with a comment on each.
+The differences that remain make examples fail, and they're explained below.
+
 ## Where the trees first differ
 
 Each row is a group of failing examples whose tree first differs from the spec's at the same place.

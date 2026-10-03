@@ -8,8 +8,14 @@ This repo tests how hard it would be to parse MyST with micromark instead.
 To measure that, we use the examples in [`myst-spec`](https://github.com/jupyter-book/mystmd/tree/main/packages/myst-spec/docs/examples).
 Each example is a bit of MyST and the [mdast](https://github.com/syntax-tree/mdast) tree it should parse to.
 An example passes when our tree is the same as the example's.
-See [how the parser works](docs/how-it-works.md), and [why examples fail](docs/differences.md).
 The latest scores are in a MyST site in [`docs/`](docs/), and the passing examples are in [`scoreboard.json`](scoreboard.json).
+
+What we've found so far:
+
+- [How the parser works](docs/how-it-works.md), with one micromark extension per MyST construct.
+- [Why examples fail](docs/differences.md), which is mostly because the spec's trees follow markdown-it, not mdast.
+- [What isn't supported yet](docs/how-it-works.md#not-supported-yet), with an effort estimate for each.
+- [What was hard about micromark](docs/how-it-works.md#notes-on-micromark).
 
 ## Run it
 
