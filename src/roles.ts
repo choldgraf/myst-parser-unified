@@ -23,7 +23,7 @@ export function role(): Extension {
 }
 
 const nameChar = /[a-zA-Z0-9_.\-+:]/;
-const isNameChar = (code: Code) => code !== null && code > 0 && nameChar.test(String.fromCharCode(code));
+export const isNameChar = (code: Code) => code !== null && code > 0 && nameChar.test(String.fromCharCode(code));
 
 function tokenizeRole(effects: Effects, ok: State, nok: State): State {
   let fenceSize = 0;

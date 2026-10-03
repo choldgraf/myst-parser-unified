@@ -30,6 +30,7 @@ These differences need a small transform or a `normalize()` rule each, and a dec
 - **Null or empty fields** (`lang: null vs "…"`, `title: extra in ours`) are the largest group.
   mdast writes `title: null`, `lang: null`, `meta: null` and `align: [null]`, where the spec leaves them out or uses `lang: ""`.
 - **List `spread`** (`spread: false vs true`): the spec sets `spread: true` on every list item and `false` on the list, like markdown-it.
+  Items in tight lists also hold text directly, with no paragraph (see [Phase 3](./phase-3.md)).
   mdast works out loose and tight lists ([mystmd#1957](https://github.com/jupyter-book/mystmd/issues/1957)).
 - **Reference links** (`type linkReference vs link`, `type imageReference vs image`, `type definition vs …`): the spec resolves `[a]` into a `link` and drops the `definition`, like markdown-it.
   mdast keeps `linkReference` and `definition` nodes.

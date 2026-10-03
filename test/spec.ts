@@ -4,8 +4,11 @@ import { createRequire } from 'node:module';
 import { isDeepStrictEqual } from 'node:util';
 import { load } from 'js-yaml';
 import type { Root } from 'mdast';
+import { defaultDirectives } from 'myst-directives';
 import { defaultRoles } from 'myst-roles';
-// myst-parser doesn't export applyRoles, so import its file directly (pinned to 1.7.4 for this)
+import { containerChildrenTransform } from 'myst-transforms';
+// myst-parser doesn't export these, so import their files directly (pinned to 1.7.4 for this)
+import { applyDirectives } from '../node_modules/myst-parser/dist/directives.js';
 import { applyRoles } from '../node_modules/myst-parser/dist/roles.js';
 import { VFile } from 'vfile';
 import { visit } from 'unist-util-visit';
@@ -44,16 +47,37 @@ export function normalize(tree: Root): Root {
     // mdast sets these to null where the spec leaves them out
     if (node.start === null) delete node.start;
     if (node.checked === null) delete node.checked;
+    // mystmd's spec test makes these changes too, because the spec's directive examples are older
+    if (node.type === 'mystDirective') {
+      if (typeof node.value === 'string') node.value = node.value.trim();
+      delete node.tight;
+      for (const [key, value] of Object.entries(node.options ?? {})) {
+        if (typeof value !== 'string') continue;
+        if (!isNaN(Number(value))) node.options[key] = Number(value);
+        else if (value.toLowerCase() === 'true') node.options[key] = true;
+        else if (value.toLowerCase() === 'false') node.options[key] = false;
+      }
+    }
   });
   return copy;
 }
 
+/** Our tree after mystmd's directives and roles run, which is what the spec expects */
+export function mystTree(src: string): Root {
+  // mystmd's types are older than ours, hence `any`
+  const tree = parse(src) as any;
+  const vfile = new VFile() as any;
+  // Positions aren't compared, so nested parses don't need a line offset
+  applyDirectives(tree, defaultDirectives, vfile, { parseMyst: mystTree as any });
+  applyRoles(tree, defaultRoles, vfile);
+  // mystmd's spec test does this for figures, because the spec's figure examples are older
+  if (src.includes('{figure}')) containerChildrenTransform(tree, vfile);
+  return tree;
+}
+
 /** Compare our tree with the mdast that the spec example expects */
 export function compare({ src, mdast }: Case) {
-  const tree = parse(src);
-  // The spec expects the tree after roles run, so run mystmd's (its types are older, hence `any`)
-  applyRoles(tree as any, defaultRoles, new VFile() as any);
-  const ours = normalize(tree);
+  const ours = normalize(mystTree(src));
   const reference = normalize(mdast);
   return { ours, reference, match: isDeepStrictEqual(ours, reference) };
 }

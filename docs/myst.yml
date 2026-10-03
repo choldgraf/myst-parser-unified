@@ -7,5 +7,6 @@ project:
     - file: index.md
     - file: phase-1.md
     - file: phase-2.md
+    - file: phase-3.md
 site:
   template: book-theme

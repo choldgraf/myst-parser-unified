@@ -29,3 +29,35 @@ test.each(roles)('role syntax matches mystmd: %j', (src) => {
   const reference = tokensToMyst(src, tokenizer.parse(src, {})) as any;
   expect(normalize(parse(src))).toEqual(normalize(reference));
 });
+
+test('directive arguments, options and bodies are parsed in place, with exact positions', () => {
+  const directive = (parse('> ```{note} An *arg*\n> :class: tip\n>\n> Body *text*\n> ```').children[0] as any).children[0];
+  expect(directive).toMatchObject({ type: 'mystDirective', name: 'note', args: 'An *arg*', options: { class: 'tip' } });
+  const [arg, option, body] = directive.children;
+  expect(arg.children[1].position.start).toEqual({ line: 1, column: 16, offset: 15 });
+  expect(option.children[0].position.start).toEqual({ line: 2, column: 11, offset: 31 });
+  expect(body).toMatchObject({ value: 'Body *text*' });
+  expect(body.children[0].children[1].position.start).toEqual({ line: 4, column: 8, offset: 44 });
+});
+
+// The spec only has simple directives, so compare these with mystmd's parser, before directives run
+const directives = [
+  '~~~{note}\nX\n~~~',
+  ':::{note} Arg\n:class: a\n\nBody\n:::',
+  '````{a}\n```{b}\nX\n```\n````',
+  '::::{a}\n:::{b}\nX\n:::\n::::',
+  '```{note}\nunclosed',
+  'Para\n```{note}\nX\n```',
+  '> ```{note}\n> Hello\n> ```',
+  '```{note}\n:class: a\n:class: b\n:flag:\n:x:   \n```',
+  '```{note}\n\n\n  Body\n\n```',
+  '```{note}\n\n:class: a\n```',
+  '```{note}\n```',
+  '  ```{note}\n   X\n\n    Y\n  ```',
+  '```{code} python\n# not a heading\n```',
+];
+
+test.each(directives)('directive syntax matches mystmd: %j', (src) => {
+  const reference = tokensToMyst(src, tokenizer.parse(src, {})) as any;
+  expect(normalize(parse(src))).toEqual(normalize(reference));
+});
