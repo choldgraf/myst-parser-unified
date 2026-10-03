@@ -1,5 +1,5 @@
 import type { Root } from 'mdast';
-import { fromMarkdown } from 'mdast-util-from-markdown';
+import { fromMarkdown, type Extension as FromMarkdownExtension } from 'mdast-util-from-markdown';
 import { frontmatterFromMarkdown } from 'mdast-util-frontmatter';
 import { gfmFootnoteFromMarkdown } from 'mdast-util-gfm-footnote';
 import { gfmTableFromMarkdown } from 'mdast-util-gfm-table';
@@ -10,23 +10,27 @@ import { gfmFootnote } from 'micromark-extension-gfm-footnote';
 import { gfmTable } from 'micromark-extension-gfm-table';
 import { gfmTaskListItem } from 'micromark-extension-gfm-task-list-item';
 import { math } from 'micromark-extension-math';
+import type { Extension } from 'micromark-util-types';
 import { blocks, blocksFromMarkdown } from './blocks.ts';
 import { directive, directiveFromMarkdown } from './directives.ts';
 import { role, roleFromMarkdown } from './roles.ts';
 
+// Each syntax has a micromark extension, which tokenizes it, and an mdast extension, which turns its tokens into nodes
+const syntaxes: [Extension, FromMarkdownExtension][] = [
+  [frontmatter(), frontmatterFromMarkdown()],
+  [gfmFootnote(), gfmFootnoteFromMarkdown()],
+  [gfmTable(), gfmTableFromMarkdown()],
+  [gfmTaskListItem(), gfmTaskListItemFromMarkdown()],
+  [math(), mathFromMarkdown()],
+  [role(), roleFromMarkdown()],
+  [directive(), directiveFromMarkdown()],
+  [blocks(), blocksFromMarkdown()],
+];
+
 /** Parse MyST markdown to mdast */
 export function parse(src: string): Root {
   return fromMarkdown(src, {
-    extensions: [frontmatter(), gfmFootnote(), gfmTable(), gfmTaskListItem(), math(), role(), directive(), blocks()],
-    mdastExtensions: [
-      frontmatterFromMarkdown(),
-      gfmFootnoteFromMarkdown(),
-      gfmTableFromMarkdown(),
-      gfmTaskListItemFromMarkdown(),
-      mathFromMarkdown(),
-      roleFromMarkdown(),
-      directiveFromMarkdown(),
-      blocksFromMarkdown(),
-    ],
+    extensions: syntaxes.map(([micromark]) => micromark),
+    mdastExtensions: syntaxes.map(([, mdast]) => mdast),
   });
 }
