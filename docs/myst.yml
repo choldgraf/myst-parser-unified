@@ -8,5 +8,6 @@ project:
     - file: phase-1.md
     - file: phase-2.md
     - file: phase-3.md
+    - file: phase-5.md
 site:
   template: book-theme

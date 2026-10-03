@@ -47,7 +47,8 @@ export function normalize(tree: Root): Root {
     // mdast sets these to null where the spec leaves them out
     if (node.start === null) delete node.start;
     if (node.checked === null) delete node.checked;
-    // mystmd's spec test makes these changes too, because the spec's directive examples are older
+    // mystmd's spec test makes these changes too, because the spec is older
+    if (node.type === 'comment') node.type = 'mystComment';
     if (node.type === 'mystDirective') {
       if (typeof node.value === 'string') node.value = node.value.trim();
       delete node.tight;

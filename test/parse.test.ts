@@ -61,3 +61,24 @@ test.each(directives)('directive syntax matches mystmd: %j', (src) => {
   const reference = tokensToMyst(src, tokenizer.parse(src, {})) as any;
   expect(normalize(parse(src))).toEqual(normalize(reference));
 });
+
+// The spec only has simple targets, comments and block breaks, so compare these with mystmd's parser
+const blockSyntax = [
+  '% hi  \n%there\nPara',
+  '% a\n\n% b',
+  'x\n% c\n  % d\ny',
+  '> % q\n> (t)=\n> +++',
+  'Para\n+++ {"a": 1}\nNext',
+  '++ +x',
+  '++',
+  '(my-label)=\n# H',
+  'Para\n(x)=  ',
+  '(bad label)=',
+  '(x)= y',
+];
+
+test.each(blockSyntax)('block syntax matches mystmd: %j', (src) => {
+  // mystmd puts the content between block breaks in `block` nodes by default, and the spec doesn't
+  const reference = tokensToMyst(src, tokenizer.parse(src, {}), { nestBlocks: false } as any) as any;
+  expect(normalize(parse(src))).toEqual(normalize(reference));
+});
