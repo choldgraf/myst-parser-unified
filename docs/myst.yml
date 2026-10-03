@@ -1,0 +1,10 @@
+version: 1
+project:
+  title: myst-parser-unified
+  plugins:
+    - https://github.com/myst-contrib/myst-listing/releases/latest/download/plugin.mjs
+  toc:
+    - file: index.md
+    - file: phase-1.md
+site:
+  template: book-theme

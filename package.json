@@ -1,0 +1,41 @@
+{
+  "name": "myst-parser-unified",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "vitest run",
+    "score": "node scripts/score.ts",
+    "docs": "npm run score && cd docs && myst build --html",
+    "docs:live": "npm run score && cd docs && myst start",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "mdast-util-from-markdown": "^2.0.3",
+    "mdast-util-frontmatter": "^2.0.1",
+    "mdast-util-gfm-footnote": "^2.1.0",
+    "mdast-util-gfm-table": "^2.0.0",
+    "mdast-util-gfm-task-list-item": "^2.0.0",
+    "mdast-util-math": "^3.0.0",
+    "micromark-extension-frontmatter": "^2.0.0",
+    "micromark-extension-gfm-footnote": "^2.1.0",
+    "micromark-extension-gfm-table": "^2.1.2",
+    "micromark-extension-gfm-task-list-item": "^2.1.0",
+    "micromark-extension-math": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/mdast": "^4.0.4",
+    "@types/node": "^26.6.3",
+    "js-yaml": "^5.4.2",
+    "myst-parser": "1.7",
+    "myst-spec": "^0.0.6",
+    "typescript": "^7.0.2",
+    "unist-util-visit": "^5.1.0",
+    "vitest": "^5.0.2"
+  }
+}
