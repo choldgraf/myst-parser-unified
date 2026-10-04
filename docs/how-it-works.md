@@ -59,7 +59,7 @@ Like a heading, each one can come right after a line of text, without a blank li
 
 ## Not supported yet
 
-mystmd's parser accepts these, but no spec example tests them.
+mystmd's parser accepts these, but no myst-spec example uses them, so the score doesn't count them.
 Each effort estimate is compared to the constructs above.
 
 - Inline options, like `` {sub .class #id}`2` `` or ```` ```{note .class} ````. Small: adapt the attribute parser in `micromark-extension-directive`.

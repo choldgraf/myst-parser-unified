@@ -1,4 +1,4 @@
-// Compare our parser with the expected mdast in every myst-spec example.
+// Compare our parser with mystmd's parser on every myst-spec example.
 //   npm run score                 score per file, and update scoreboard.json and docs/data/
 //   npm run score -- "<search>"   show why examples whose id contains <search> don't match
 import assert from 'node:assert';
@@ -9,13 +9,15 @@ const search = process.argv[2];
 const cases = loadCases();
 
 if (search !== undefined) {
-  const failing = cases.filter((c) => c.id.includes(search) && !compare(c).match);
-  for (const c of failing.slice(0, 3)) {
-    const { ours, reference } = compare(c);
+  const failing = cases
+    .filter((c) => c.id.includes(search))
+    .map((c) => ({ ...c, ...compare(c) }))
+    .filter((c) => !c.match);
+  for (const { id, src, ours, reference } of failing.slice(0, 3)) {
     try {
       assert.deepStrictEqual(ours, reference);
     } catch (error) {
-      console.log(`## ${c.id}\n\n${c.src}\n${(error as Error).message}\n`);
+      console.log(`## ${id}\n\n${src}\n${(error as Error).message}\n`);
     }
   }
   console.log(`${failing.length} failing examples match "${search}"`);

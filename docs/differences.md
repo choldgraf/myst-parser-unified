@@ -1,27 +1,67 @@
-# Differences from the spec
+# Differences from mystmd
 
-Almost every example that fails does so because the spec's tree has a different shape from ours, not because of MyST syntax.
-mystmd parses with markdown-it, and the spec records many of markdown-it's habits as expected output.
-Our tree follows [mdast](https://github.com/syntax-tree/mdast) instead.
-[mystmd#3078](https://github.com/jupyter-book/mystmd/issues/3078) proposes fixing these in the spec.
+An example passes when our tree is the same as the one mystmd's own parser builds from the example's source.
+Our tree is standard [mdast](https://github.com/syntax-tree/mdast).
+mystmd's parser runs a few extra passes and has some habits of its own.
+So each difference below is something an adapter from mdast to mystmd's shape would need to do.
+We keep emitting mdast here, and whether mystmd wants that adapter is up to mystmd.
 
 ## How examples are compared
 
-mystmd handles directives and roles in two steps.
-First its parser builds a generic `mystDirective` or `mystRole` node, and our handlers build the same nodes.
-Then mystmd *runs* each one, which replaces it with real content, like an `admonition` node for `{note}`.
+[`test/spec.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/spec.ts) parses each myst-spec example's source with our parser and with mystmd's `tokensToMyst`, and compares the two trees.
+Both trees are from before directives and roles run, so they have generic `mystDirective` and `mystRole` nodes.
+We use the same options as `myst build`: mystmd's defaults, which include smartquotes, plus linkify.
+We don't use the spec's expected trees, which are from after directives and roles run.
 
-The spec expects the tree after that second step.
-So [`test/spec.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/spec.ts) runs mystmd's own `applyDirectives` and `applyRoles` on our tree before comparing.
-These come from `myst-parser`, mystmd's parser package, which doesn't export them.
-So we import their files by path, and pin `myst-parser` to an exact version in case those paths change.
+`normalize()` ignores positions (mystmd has no columns), fields that mdast sets to `null`, and `tight` on directives.
+[`test/parse.test.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/parse.test.ts) compares MyST syntax edge cases with mystmd in the same way.
 
-`normalize()` in `test/spec.ts` removes a few differences we accept, with a comment on each.
-The differences that remain make examples fail, and they're explained below.
+## What an adapter would need to do
+
+The rough counts are failing examples that first differ there, from the table further down.
+
+Code `lang` and `meta` (about 70)
+: mystmd sets `lang: ""` on code with no language, and drops `meta`, the text after the language.
+
+List `spread` (about 70)
+: mystmd sets `spread: false` on every list and `spread: true` on every list item, whatever the blank lines.
+  Its `listItemParagraphs` pass already wraps the text of tight list items in paragraphs, like mdast.
+
+Resolved references (about 65)
+: mystmd turns `[text][ref]` into a `link` and `![alt][ref]` into an `image`, and drops the `definition` nodes.
+  mdast keeps `linkReference`, `imageReference` and `definition`.
+
+Smartquotes (about 20)
+: mystmd turns straight quotes into curly ones, and `...` into `…`.
+
+Images out of paragraphs (about 20)
+: mystmd's `hoistSingleImagesOutofParagraphs` replaces a paragraph that only has an image with the image.
+
+Linkify (about 10)
+: `myst build` turns bare URLs like `www.example.com` into links, including in directive arguments like a figure's.
+  `micromark-extension-gfm-autolink-literal` does something similar, with different rules.
+
+URL encoding (about 10)
+: mystmd percent-encodes link URLs, like `/föö` to `/f%C3%B6%C3%B6`.
+
+Blocks (4)
+: mystmd's `nestBlocks` puts the content after each `+++` in a `block` node, instead of a `blockBreak` node before it.
+
+Front matter (2)
+: mystmd turns front matter into a `code` node with `lang: "yaml"`, where mdast has a `yaml` node.
+
+Tables (1)
+: mystmd puts `align` on each cell instead of the table, and marks the cells of the first row with `header: true`.
+
+A few examples fail for reasons an adapter can't fix:
+
+- micromark follows CommonMark 0.31.2 and markdown-it follows 0.30, which ended HTML comments differently.
+- We keep line endings inside inline code, where CommonMark turns them into spaces.
+- markdown-it drops the last line ending of an HTML block at the end of a file.
 
 ## Where the trees first differ
 
-Each row is a group of failing examples whose tree first differs from the spec's at the same place.
+Each row is a group of failing examples whose tree first differs from mystmd's at the same place.
 Values in quotes are replaced with `"…"`, so that similar failures share a row.
 To see the full diff for an example, run `npm run score -- "<example>"`.
 
@@ -33,40 +73,3 @@ To see the full diff for an example, run `npm run score -- "<example>"`.
 :sortable:
 :limit: 0
 :::
-
-## Why they differ
-
-Empty fields
-: We write `title: null`, `lang: null`, `meta: null` and `align: [null]`.
-  The spec leaves these out, or uses `lang: ""`.
-
-Lists
-: The spec puts `spread: true` on every list item, even in tight lists (lists with no blank lines between items).
-  It also puts the text of a tight list item straight in the item, with no paragraph.
-  We work out whether a list is tight, and always wrap the text in a paragraph ([mystmd#1957](https://github.com/jupyter-book/mystmd/issues/1957)).
-  mystmd's parser now adds the paragraph too, but the spec was never updated, so mystmd's spec test turns it off.
-
-Reference links
-: The spec turns `[text][ref]` into a `link`, and drops the `[ref]: url` definition.
-  We keep both, as `linkReference` and `definition` nodes.
-
-Code `meta`
-: The spec drops the text after the language in a code fence, like `extra` in ```` ```python extra ````.
-  We keep it as `meta`.
-
-Front matter
-: The spec has no front matter, so `---` lines at the top of a file are thematic breaks.
-  We parse them as front matter, like mystmd does by default.
-
-Table headers
-: The spec marks header cells with `header: true`.
-  We treat the first row as the header instead.
-
-CommonMark edge cases
-: The spec's CommonMark examples are from version 0.30, and micromark follows 0.31.2, which changed how HTML comments end.
-  We also keep line endings inside inline code, where CommonMark turns them into spaces.
-
-Examples mystmd skips
-: Four of the failing CommonMark examples (25, 333, 353 and 506) are ones that mystmd's spec test skips too.
-
-For reference links, code `meta` and lists, our tree keeps information that the spec's tree loses.

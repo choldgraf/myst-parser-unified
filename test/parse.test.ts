@@ -1,7 +1,6 @@
-import { createTokenizer, tokensToMyst } from 'myst-parser';
 import { expect, test } from 'vitest';
 import { parse } from '../src/parse.ts';
-import { normalize } from './spec.ts';
+import { mystmd, normalize } from './spec.ts';
 
 test('nodes have line, column and offset', () => {
   const paragraph = parse('Hello *world*').children[0] as any;
@@ -73,10 +72,8 @@ const syntax = [
   '(bad label)=',
   '(x)= y',
 ];
-const tokenizer = createTokenizer();
 
 test.each(syntax)('syntax matches mystmd: %j', (src) => {
-  // mystmd puts the content between block breaks in `block` nodes by default, and the spec doesn't
-  const reference = tokensToMyst(src, tokenizer.parse(src, {}), { nestBlocks: false } as any) as any;
-  expect(normalize(parse(src))).toEqual(normalize(reference));
+  // mystmd puts the content between block breaks in `block` nodes, which docs/differences.md covers
+  expect(normalize(parse(src))).toEqual(normalize(mystmd(src, { nestBlocks: false })));
 });
