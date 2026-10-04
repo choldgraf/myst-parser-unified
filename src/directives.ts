@@ -305,7 +305,7 @@ export function directiveFromMarkdown(): FromMarkdownExtension {
   return {
     enter: {
       mystDirective(token) {
-        this.enter({ type: 'mystDirective', name: '', processed: false, children: [] } as any, token);
+        this.enter({ type: 'mystDirective', name: '', processed: false, children: [] }, token);
       },
       mystDirectiveName(token) {
         current(this).name = this.sliceSerialize(token);
@@ -313,10 +313,10 @@ export function directiveFromMarkdown(): FromMarkdownExtension {
       mystDirectiveArg(token) {
         const value = this.sliceSerialize(token).trim();
         current(this).args = value;
-        this.enter({ type: 'mystDirectiveArg', value, children: [] } as any, token);
+        this.enter({ type: 'mystDirectiveArg', value, children: [] }, token);
       },
       mystOption(token) {
-        this.enter({ type: 'mystOption', name: '', location: 'colon', value: true, children: [] } as any, token);
+        this.enter({ type: 'mystOption', name: '', location: 'colon', value: true, children: [] }, token);
       },
       mystOptionName(token) {
         current(this).name = this.sliceSerialize(token);
@@ -330,7 +330,7 @@ export function directiveFromMarkdown(): FromMarkdownExtension {
         const indent = new RegExp(`\n {0,${(token as any)._indent}}`, 'g');
         const value = this.sliceSerialize(token).replace(indent, '\n').replace(/^([ \t]*\r?\n)+/, '').trimEnd();
         current(this).value = value;
-        this.enter({ type: 'mystDirectiveBody', value, children: [] } as any, token);
+        this.enter({ type: 'mystDirectiveBody', value, children: [] }, token);
       },
     },
     exit: {

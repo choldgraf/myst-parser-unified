@@ -1,4 +1,4 @@
-import type { Root } from 'mdast';
+import type { BlockContent, DefinitionContent, Literal, Node, Parent, PhrasingContent, Root } from 'mdast';
 import { fromMarkdown, type Extension as FromMarkdownExtension } from 'mdast-util-from-markdown';
 import { frontmatterFromMarkdown } from 'mdast-util-frontmatter';
 import { gfmFootnoteFromMarkdown } from 'mdast-util-gfm-footnote';
@@ -40,4 +40,77 @@ export function remarkMyst(this: { data(): Record<string, any> }) {
   const data = this.data();
   (data.micromarkExtensions ??= []).push(...syntaxes.map(([micromark]) => micromark));
   (data.fromMarkdownExtensions ??= []).push(...syntaxes.map(([, mdast]) => mdast));
+}
+
+// The nodes that the MyST mdast extensions add
+declare module 'mdast' {
+  interface MystRole extends Parent {
+    type: 'mystRole';
+    name: string;
+    value: string;
+    processed: false;
+    children: MystRoleBody[];
+  }
+  interface MystRoleBody extends Parent {
+    type: 'mystRoleBody';
+    value: string;
+    children: PhrasingContent[];
+  }
+  interface MystDirective extends Parent {
+    type: 'mystDirective';
+    name: string;
+    args?: string;
+    options?: Record<string, string | true>;
+    value?: string;
+    processed: false;
+    children: (MystDirectiveArg | MystOption | MystDirectiveBody)[];
+  }
+  interface MystDirectiveArg extends Parent {
+    type: 'mystDirectiveArg';
+    value: string;
+    children: PhrasingContent[];
+  }
+  interface MystOption extends Parent {
+    type: 'mystOption';
+    name: string;
+    location: string;
+    value: string | true;
+    children: PhrasingContent[];
+  }
+  interface MystDirectiveBody extends Parent {
+    type: 'mystDirectiveBody';
+    value: string;
+    children: (BlockContent | DefinitionContent)[];
+  }
+  interface MystTarget extends Node {
+    type: 'mystTarget';
+    label: string;
+  }
+  interface Comment extends Literal {
+    type: 'comment';
+  }
+  interface BlockBreak extends Node {
+    type: 'blockBreak';
+    meta?: string;
+  }
+  interface PhrasingContentMap {
+    mystRole: MystRole;
+  }
+  interface BlockContentMap {
+    mystDirective: MystDirective;
+    mystTarget: MystTarget;
+    comment: Comment;
+    blockBreak: BlockBreak;
+  }
+  interface RootContentMap {
+    mystRole: MystRole;
+    mystRoleBody: MystRoleBody;
+    mystDirective: MystDirective;
+    mystDirectiveArg: MystDirectiveArg;
+    mystOption: MystOption;
+    mystDirectiveBody: MystDirectiveBody;
+    mystTarget: MystTarget;
+    comment: Comment;
+    blockBreak: BlockBreak;
+  }
 }

@@ -156,7 +156,7 @@ export function blocksFromMarkdown(): FromMarkdownExtension {
   return {
     enter: {
       mystTarget(token) {
-        this.enter({ type: 'mystTarget', label: '' } as any, token);
+        this.enter({ type: 'mystTarget', label: '' }, token);
       },
       mystTargetLabel(token) {
         current(this).label = this.sliceSerialize(token);
@@ -165,10 +165,10 @@ export function blocksFromMarkdown(): FromMarkdownExtension {
         // Like mystmd: drop each line's `%` and trailing whitespace, then trim the whole comment
         const lines = this.sliceSerialize(token).split(/\r?\n/);
         const value = lines.map((line) => line.trimStart().slice(1).trimEnd()).join('\n').trim();
-        this.enter({ type: 'comment', value } as any, token);
+        this.enter({ type: 'comment', value }, token);
       },
       mystBlockBreak(token) {
-        this.enter({ type: 'blockBreak' } as any, token);
+        this.enter({ type: 'blockBreak' }, token);
       },
       mystBlockBreakMeta(token) {
         current(this).meta = this.sliceSerialize(token).trim();

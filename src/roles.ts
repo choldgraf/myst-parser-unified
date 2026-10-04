@@ -162,7 +162,7 @@ export function roleFromMarkdown(): FromMarkdownExtension {
     canContainEols: ['mystRoleBody'],
     enter: {
       mystRole(token) {
-        this.enter({ type: 'mystRole', name: '', value: '', processed: false, children: [] } as any, token);
+        this.enter({ type: 'mystRole', name: '', value: '', processed: false, children: [] }, token);
       },
       mystRoleName(token) {
         current(this).name = this.sliceSerialize(token);
@@ -170,7 +170,7 @@ export function roleFromMarkdown(): FromMarkdownExtension {
       mystRoleBody(token) {
         const value = this.sliceSerialize(token);
         current(this).value = value;
-        this.enter({ type: 'mystRoleBody', value, children: [] } as any, token);
+        this.enter({ type: 'mystRoleBody', value, children: [] }, token);
       },
     },
     exit: {
