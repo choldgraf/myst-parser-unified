@@ -17,6 +17,12 @@ What we've found so far:
 - [What isn't supported yet](docs/how-it-works.md#not-supported-yet), with an effort estimate for each.
 - [What was hard about micromark](docs/how-it-works.md#notes-on-micromark).
 
+## Use it
+
+`parse(src)` from the package root returns an mdast tree.
+To add MyST syntax to your own micromark setup instead, import a syntax's micromark and mdast extensions from `myst-parser-unified/roles`, `/directives` or `/blocks`.
+They're TypeScript, so use them from a bundler or a workspace.
+
 ## Run it
 
 You need Node 24 or later, which runs the TypeScript files directly.

@@ -9,6 +9,12 @@
     "typecheck": "tsc --noEmit"
   },
   "type": "module",
+  "exports": {
+    ".": "./src/parse.ts",
+    "./roles": "./src/roles.ts",
+    "./directives": "./src/directives.ts",
+    "./blocks": "./src/blocks.ts"
+  },
   "private": true,
   "dependencies": {
     "mdast-util-from-markdown": "^2.0.3",
