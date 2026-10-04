@@ -18,9 +18,19 @@ What we've found so far:
 
 ## Use it
 
-`parse(src)` from the package root returns an mdast tree.
-To add MyST syntax to your own micromark setup instead, import a syntax's micromark and mdast extensions from `myst-parser-unified/roles`, `/directives` or `/blocks`.
-They're TypeScript, so use them from a bundler or a workspace.
+`parse(src)` returns an mdast tree, and the `remarkMyst` plugin adds the same MyST syntax to remark:
+
+```js
+import { parse, remarkMyst } from 'myst-parser-unified';
+import remarkParse from 'remark-parse';
+import { unified } from 'unified';
+
+const tree = parse(src);
+const sameTree = unified().use(remarkParse).use(remarkMyst).parse(src);
+```
+
+The package is TypeScript, so use it from a bundler or a workspace.
+micromark isn't incremental, so this isn't meant for highlighting an editor on every keystroke.
 
 ## Run it
 

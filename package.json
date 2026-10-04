@@ -10,10 +10,7 @@
   },
   "type": "module",
   "exports": {
-    ".": "./src/parse.ts",
-    "./roles": "./src/roles.ts",
-    "./directives": "./src/directives.ts",
-    "./blocks": "./src/blocks.ts"
+    ".": "./src/parse.ts"
   },
   "private": true,
   "dependencies": {
@@ -41,7 +38,9 @@
     "myst-parser": "^1.7.4",
     "myst-spec": "^0.0.6",
     "mystmd": "^1.11.0",
+    "remark-parse": "^11.0.0",
     "typescript": "^7.0.2",
+    "unified": "^11.0.5",
     "vitest": "^5.0.2"
   }
 }

@@ -34,3 +34,10 @@ export function parse(src: string): Root {
     mdastExtensions: syntaxes.map(([, mdast]) => mdast),
   });
 }
+
+/** remark plugin: parse MyST, like `unified().use(remarkParse).use(remarkMyst)` */
+export function remarkMyst(this: { data(): Record<string, any> }) {
+  const data = this.data();
+  (data.micromarkExtensions ??= []).push(...syntaxes.map(([micromark]) => micromark));
+  (data.fromMarkdownExtensions ??= []).push(...syntaxes.map(([, mdast]) => mdast));
+}

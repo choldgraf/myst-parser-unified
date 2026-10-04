@@ -1,5 +1,7 @@
+import remarkParse from 'remark-parse';
+import { unified } from 'unified';
 import { expect, test } from 'vitest';
-import { parse } from '../src/parse.ts';
+import { parse, remarkMyst } from '../src/parse.ts';
 import { mystmd, normalize } from './spec.ts';
 
 test('nodes have line, column and offset', () => {
@@ -28,6 +30,11 @@ test('directive arguments, options and bodies are parsed in place, with exact po
   expect(option.children[0].position.start).toEqual({ line: 2, column: 11, offset: 31 });
   expect(body).toMatchObject({ value: 'Body *text*' });
   expect(body.children[0].children[1].position.start).toEqual({ line: 4, column: 8, offset: 44 });
+});
+
+test('remarkMyst parses like parse', () => {
+  const src = '(x)=\n```{note} An *arg*\n:class: tip\n\nH{sub}`2`O\n```';
+  expect(unified().use(remarkParse).use(remarkMyst).parse(src)).toEqual(parse(src));
 });
 
 // The spec only has simple MyST syntax, so compare these edge cases with mystmd's parser,

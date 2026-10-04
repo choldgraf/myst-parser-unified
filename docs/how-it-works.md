@@ -7,7 +7,7 @@ Each MyST construct is one extension with two parts:
 - a **tokenizer**, which tells micromark how to find the syntax;
 - a **handler**, which builds the same nodes that mystmd's parser builds.
 
-The extensions are in `src/`, and [`src/parse.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/parse.ts) puts them together.
+The extensions are in `src/`, and [`src/parse.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/parse.ts) puts them together, as `parse()` and the `remarkMyst` plugin.
 Every node gets an exact line, column and offset, including in nested content, so tools like editors can point at the right spot in the source.
 
 ## Roles
