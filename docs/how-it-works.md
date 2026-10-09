@@ -1,13 +1,13 @@
 # How it works
 
-The parser is `mdast-util-from-markdown` with micromark extensions.
+The parser is `mdast-util-from-markdown` with extensions for MyST.
 micromark splits the source into tokens, and `mdast-util-from-markdown` turns those tokens into an mdast tree.
-Each MyST construct is one extension with two parts:
+Each of `src/roles.ts`, `src/directives.ts` and `src/blocks.ts` exports two extensions:
 
-- a **tokenizer**, which tells micromark how to find the syntax;
-- a **handler**, which builds the same nodes that mystmd's parser builds.
+- a **micromark extension**, which tells micromark how to find the syntax;
+- an **mdast extension**, which builds the same nodes that mystmd's parser builds.
 
-The extensions are in `src/`, and [`src/parse.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/parse.ts) puts them together, as `parse()` and the `remarkMyst` plugin.
+[`src/parse.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/parse.ts) puts them together, as `parse()` and the `remarkMyst` plugin.
 Every node gets an exact line, column and offset, including in nested content, so tools like editors can point at the right spot in the source.
 
 ## Roles
@@ -18,7 +18,7 @@ Like inline code, the body ends at a run of exactly as many backticks as it star
 
 The body is parsed as inline markdown where it sits in the document, so `` {sub}`*2*` `` has an `emphasis` node inside it.
 mystmd parses the body again as a separate string.
-So its nodes inside a role have line numbers, but no columns ([mystmd#2864](https://github.com/jupyter-book/mystmd/issues/2864)).
+Like the rest of its nodes, those have line numbers but no columns ([mystmd#2864](https://github.com/jupyter-book/mystmd/issues/2864)).
 
 ## Directives
 
@@ -52,7 +52,8 @@ Like a heading, each one can come right after a line of text, without a blank li
 
 ## Notes on micromark
 
-- micromark's API is low level. We learned it by copying patterns from micromark's own constructs and from `micromark-extension-directive`.
+- micromark's API is low level.
+  Its own constructs and `micromark-extension-directive` are good patterns to copy.
 - TypeScript needs each new token type declared on `TokenTypeMap` in `micromark-util-types`.
 - micromark checks for a list before it tries our constructs. So `+ + +` (with spaces) is a list here, and a block break in mystmd. Plain `+++` works.
 - `npm test` uses vitest, which loads micromark's development build. That build checks that tokenizers follow micromark's rules, and the normal build doesn't.
