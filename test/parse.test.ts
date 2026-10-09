@@ -84,3 +84,9 @@ test.each(syntax)('syntax matches mystmd: %j', (src) => {
   // mystmd puts the content between block breaks in `block` nodes, which docs/differences.md covers
   expect(normalize(parse(src))).toEqual(normalize(mystmd(src, { nestBlocks: false })));
 });
+
+// docs/how-it-works.md covers this difference
+test('`+ + +` is a list here, and a block break in mystmd', () => {
+  expect(parse('+ + +').children[0].type).toBe('list');
+  expect(mystmd('+ + +', { nestBlocks: false }).children[0].type).toBe('blockBreak');
+});

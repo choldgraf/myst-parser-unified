@@ -26,7 +26,7 @@ export function blocks(): Extension {
     flow: {
       [codes.leftParenthesis]: { name: 'mystTarget', tokenize: tokenizeTarget },
       [codes.percentSign]: { name: 'mystComment', tokenize: tokenizeComment },
-      // This runs before CommonMark's lists, so `+ + +` is a block break, not a list
+      // micromark checks for a list before this runs, so `+ + +` is a list, unlike in mystmd
       [codes.plusSign]: { name: 'mystBlockBreak', tokenize: tokenizeBlockBreak },
     },
   };
