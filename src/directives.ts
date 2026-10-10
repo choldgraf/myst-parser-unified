@@ -14,7 +14,7 @@ import type {
   TokenizeContext,
   Token as MicromarkToken,
 } from 'micromark-util-types';
-import { atLineEnd, current, exit, isNameChar, nonLazyLine } from './shared.ts';
+import { atLineEnd, current, exit, factoryName, nonLazyLine } from './shared.ts';
 
 declare module 'micromark-util-types' {
   interface TokenTypeMap {
@@ -80,26 +80,7 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
     effects.enter('mystDirectiveMarker');
     effects.consume(code);
     effects.exit('mystDirectiveMarker');
-    return nameStart;
-  }
-
-  function nameStart(code: Code) {
-    if (!isNameChar(code)) return nok(code);
-    effects.enter('mystDirectiveName');
-    return name(code);
-  }
-
-  function name(code: Code): State | undefined {
-    if (isNameChar(code)) {
-      effects.consume(code);
-      return name;
-    }
-    if (code !== codes.rightCurlyBrace) return nok(code);
-    effects.exit('mystDirectiveName');
-    effects.enter('mystDirectiveMarker');
-    effects.consume(code);
-    effects.exit('mystDirectiveMarker');
-    return factorySpace(effects, argStart, types.whitespace);
+    return factoryName(effects, factorySpace(effects, argStart, types.whitespace), nok, 'mystDirectiveName', 'mystDirectiveMarker');
   }
 
   // The rest of the opening line is the argument, parsed as inline markdown

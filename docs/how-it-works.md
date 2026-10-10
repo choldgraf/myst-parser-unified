@@ -17,8 +17,7 @@ A role is `{name}` followed by a body in backticks.
 Like inline code, the body ends at a run of exactly as many backticks as it started with.
 
 The body is parsed as inline markdown where it sits in the document, so `` {sub}`*2*` `` has an `emphasis` node inside it.
-mystmd parses the body again as a separate string.
-Like the rest of its nodes, those have line numbers but no columns ([mystmd#2864](https://github.com/jupyter-book/mystmd/issues/2864)).
+mystmd parses the body again as a separate string, so positions inside it count from the start of the body, not the document.
 
 ## Directives
 
@@ -55,19 +54,21 @@ Like a heading, each one can come right after a line of text, without a blank li
 - micromark's API is low level.
   Its own constructs and `micromark-extension-directive` are good patterns to copy.
 - TypeScript needs each new token type declared on `TokenTypeMap` in `micromark-util-types`.
-- micromark checks for a list before it tries our constructs. So `+ + +` (with spaces) is a list here, and a block break in mystmd. Plain `+++` works.
+- micromark checks for a list before it tries our constructs.
+  So `+ + +` is a list here, and a block break in mystmd.
+  Plain `+++` works in both.
 - `npm test` uses vitest, which loads micromark's development build. That build checks that tokenizers follow micromark's rules, and the normal build doesn't.
 
 ## Not supported yet
 
 mystmd's parser accepts these, but no myst-spec example uses them, so the score doesn't count them.
-Each effort estimate is compared to the constructs above.
+Effort is relative to the roles, directives and blocks above.
 
 - Spaces inside a role's braces, like `` { sub }`x` ``. Small.
 - Inline options, like `` {sub .class #id}`2` `` or ```` ```{note .class} ````. Small: adapt the attribute parser in `micromark-extension-directive`.
 - YAML options in a `---` block at the start of a directive. Small, but there are no exact positions for values inside YAML.
 - A colon fence without `{name}`, like `:::note`, which mystmd turns into a code block. Small.
 - Math environments like `\begin{equation}`. Small: one fence-like block construct.
-- Dollar math, where `$$ x $$` on one line is display math and `$$ … $$ (eq1)` has a label. Medium: adapt `micromark-extension-math`.
+- Two dollar-math forms: `$$ x $$` on one line as display math, and `$$ … $$ (eq1)` with a label. Medium: adapt `micromark-extension-math`.
 - Definition lists. Medium: `micromark-extension-definition-list` exists, but its node names differ from mystmd's.
 - Citations like `@doe2020` and `[@doe2020; @roe]`. Medium to large: `[` already starts a link in CommonMark, so this has to work with micromark's link handling.

@@ -2,11 +2,35 @@
 import type { CompileContext, Token } from 'mdast-util-from-markdown';
 import { markdownLineEnding } from 'micromark-util-character';
 import { codes, types } from 'micromark-util-symbol';
-import type { Code, Construct, Effects, State, TokenizeContext } from 'micromark-util-types';
+import type { Code, Construct, Effects, State, TokenizeContext, TokenType } from 'micromark-util-types';
 
 const nameChar = /[a-zA-Z0-9_.\-+:]/;
 /** A character in a role or directive name */
 export const isNameChar = (code: Code) => code !== null && code > 0 && nameChar.test(String.fromCharCode(code));
+
+/** A role or directive name and the `}` after it, as `nameType` and `markerType` tokens, then `ok` */
+export function factoryName(effects: Effects, ok: State, nok: State, nameType: TokenType, markerType: TokenType): State {
+  return start;
+
+  function start(code: Code) {
+    if (!isNameChar(code)) return nok(code);
+    effects.enter(nameType);
+    return name(code);
+  }
+
+  function name(code: Code): State | undefined {
+    if (isNameChar(code)) {
+      effects.consume(code);
+      return name;
+    }
+    if (code !== codes.rightCurlyBrace) return nok(code);
+    effects.exit(nameType);
+    effects.enter(markerType);
+    effects.consume(code);
+    effects.exit(markerType);
+    return ok;
+  }
+}
 
 export const atLineEnd = (code: Code) => code === codes.eof || markdownLineEnding(code);
 

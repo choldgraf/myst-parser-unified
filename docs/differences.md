@@ -2,9 +2,10 @@
 
 An example passes when our tree is the same as the one mystmd's own parser builds from the example's source.
 Our tree is standard [mdast](https://github.com/syntax-tree/mdast).
-mystmd's parser runs a few extra passes and has some habits of its own.
+mystmd's parser also runs a few extra passes, like smartquotes and resolving references.
 So each difference below is something an adapter from mdast to mystmd's shape would need to do.
-We keep emitting mdast here, and whether mystmd wants that adapter is up to mystmd.
+This parser keeps emitting mdast.
+Whether mystmd wants the adapter is mystmd's call.
 
 ## How examples are compared
 
@@ -15,13 +16,13 @@ We don't use the spec's expected trees, which are from after directives and role
 
 `normalize()` ignores positions, because mystmd's nodes have line numbers but no columns.
 It also ignores fields that mdast sets to `null`, which mystmd leaves out.
-It ignores every `tight` field too: mystmd sets `tight` on directives with no blank line around them, and we don't set it yet.
+It also ignores `tight`, which mystmd sets on directives with no blank line around them.
 [`test/parse.test.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/parse.test.ts) compares MyST syntax edge cases with mystmd in the same way.
 
 ## What an adapter would need to do
 
 The differences below go from most to fewest failing examples.
-The table at the end has the counts.
+The table at the end counts failing examples by where their tree first differs from mystmd's.
 
 Code `lang` and `meta`
 : mystmd sets `lang: ""` on code with no language, and drops `meta`, the text after the language.
@@ -59,7 +60,7 @@ Tables
 A few examples fail for reasons an adapter can't fix:
 
 - micromark follows CommonMark 0.31.2 and markdown-it follows 0.30, which ended HTML comments differently.
-- We keep line endings inside inline code, where CommonMark turns them into spaces.
+- mdast keeps line endings inside inline code, and markdown-it turns them into spaces.
 - markdown-it drops the last line ending of an HTML block at the end of a file.
 
 ## Where the trees first differ
