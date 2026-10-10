@@ -14,7 +14,8 @@ We run mystmd's parser with `myst build`'s options: mystmd's defaults, which inc
 We don't use the spec's expected trees, which are from after directives and roles run.
 
 `normalize()` ignores positions, because mystmd's nodes have line numbers but no columns.
-It also ignores fields that mdast sets to `null`, and every `tight` field.
+It also ignores fields that mdast sets to `null`, which mystmd leaves out.
+It ignores every `tight` field too: mystmd sets `tight` on directives with no blank line around them, and we don't set it yet.
 [`test/parse.test.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/parse.test.ts) compares MyST syntax edge cases with mystmd in the same way.
 
 ## What an adapter would need to do

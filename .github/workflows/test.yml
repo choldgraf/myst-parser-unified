@@ -1,0 +1,23 @@
+# Test the parser, and check that scoreboard.json is up to date
+name: test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run score
+      - name: scoreboard.json is up to date (run npm run score)
+        run: git diff --exit-code scoreboard.json

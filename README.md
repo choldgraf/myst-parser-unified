@@ -28,7 +28,9 @@ const tree = parse(src);
 const sameTree = unified().use(remarkParse).use(remarkMyst).parse(src);
 ```
 
-The package is TypeScript, so use it from a bundler or a workspace.
+It isn't on npm, so install it with `npm install github:choldgraf/myst-parser-unified`.
+It's written in TypeScript, and Node won't run TypeScript from `node_modules`.
+So use it from a bundler or a workspace.
 micromark isn't incremental, so this isn't meant for highlighting an editor on every keystroke.
 
 ## Run it
@@ -37,7 +39,7 @@ You need Node 24 or later, which runs the TypeScript files directly.
 
 - `npm install`: install the dependencies.
 - `npm run score`: score every example, and write `scoreboard.json` and the data for the site.
-- `npm run score -- "<search>"`: show why the examples whose ID contains `<search>` don't match, like `npm run score -- "directives.figure"`.
+- `npm run score -- "<search>"`: show why the first three examples whose ID contains `<search>` don't match, like `npm run score -- "directives.figure"`.
 - `npm test`: check that positions are exact, that syntax edge cases parse like mystmd's parser, and that every example in `scoreboard.json` still passes.
 - `npm run typecheck`: check the types with TypeScript.
 - `npm run docs`: score, then build the [docs site](https://chrisholdgraf.com/myst-parser-unified/).

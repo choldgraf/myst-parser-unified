@@ -1,6 +1,6 @@
 // Compare our parser with mystmd's parser on every myst-spec example.
 //   npm run score                 score per file, and update scoreboard.json and docs/data/
-//   npm run score -- "<search>"   show why examples whose id contains <search> don't match
+//   npm run score -- "<search>"   show why the first three examples whose id contains <search> don't match
 import assert from 'node:assert';
 import fs from 'node:fs';
 import { compare, firstDifference, loadCases } from '../test/spec.ts';

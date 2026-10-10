@@ -63,6 +63,7 @@ Like a heading, each one can come right after a line of text, without a blank li
 mystmd's parser accepts these, but no myst-spec example uses them, so the score doesn't count them.
 Each effort estimate is compared to the constructs above.
 
+- Spaces inside a role's braces, like `` { sub }`x` ``. Small.
 - Inline options, like `` {sub .class #id}`2` `` or ```` ```{note .class} ````. Small: adapt the attribute parser in `micromark-extension-directive`.
 - YAML options in a `---` block at the start of a directive. Small, but there are no exact positions for values inside YAML.
 - A colon fence without `{name}`, like `:::note`, which mystmd turns into a code block. Small.

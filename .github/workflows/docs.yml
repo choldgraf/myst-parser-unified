@@ -1,4 +1,4 @@
-# Test and score the parser, build the docs, and publish them to GitHub Pages
+# Score the parser, build the docs, and publish them to GitHub Pages
 name: docs
 
 on:
@@ -28,8 +28,6 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm test
-      - run: npm run typecheck
       - run: npm run docs
         env:
           # The site lives at https://<owner>.github.io/<repo>/

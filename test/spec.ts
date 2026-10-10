@@ -35,12 +35,7 @@ export function mystmd(src: string, options?: { nestBlocks?: boolean }): Root {
   return tokensToMyst(src, tokenizer.parse(src, {}), options) as any;
 }
 
-/**
- * Remove differences we don't care about.
- * mystmd has no columns, so test/parse.test.ts checks our positions.
- * mdast sets empty fields like `title` to null, where mystmd leaves them out.
- * mystmd marks directives with no blank line around them as `tight`, and we don't (yet).
- */
+/** Remove differences we don't care about; docs/differences.md says which and why. */
 export function normalize(tree: Root): Root {
   const ignore = (key: string, value: unknown) => key === 'position' || key === 'tight' || value === null;
   return JSON.parse(JSON.stringify(tree, (key, value) => (ignore(key, value) ? undefined : value)));
