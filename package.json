@@ -13,6 +13,7 @@
     ".": "./src/parse.ts"
   },
   "private": true,
+  "license": "BSD-3-Clause",
   "dependencies": {
     "@types/mdast": "^4.0.4",
     "mdast-util-from-markdown": "^2.0.3",
