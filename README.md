@@ -9,6 +9,14 @@ This repo tests how hard it would be to parse MyST with micromark instead.
 To measure that, we parse the MyST in each [`myst-spec`](https://github.com/jupyter-book/mystmd/tree/main/packages/myst-spec/docs/examples) example with our parser and with mystmd's, and compare the two [mdast](https://github.com/syntax-tree/mdast) trees.
 The passing examples are in [`scoreboard.json`](scoreboard.json).
 
+## What we found
+
+Every MyST syntax the spec uses, such as roles, directives, targets, comments and block breaks, works as a micromark extension, with exact positions.
+No example fails because of how MyST syntax is parsed.
+They fail because mystmd's tree isn't plain mdast: it uses curly quotes, sets list `spread` differently, turns bare URLs into links, nests content in `block` nodes, and so on.
+An adapter from mdast to mystmd's tree could fix those; [the differences page](docs/differences.md) lists them.
+Most of the examples are CommonMark's own spec, so the overall score mostly measures where markdown-it and micromark differ.
+
 The docs cover:
 
 - [How the parser works](docs/how-it-works.md): one micromark extension per MyST syntax.
@@ -33,6 +41,7 @@ It isn't on npm, so install it with `npm install github:choldgraf/myst-parser-un
 It's written in TypeScript, and Node won't run TypeScript from `node_modules`.
 So use it from a bundler or a workspace.
 micromark isn't incremental, so this isn't meant for highlighting an editor on every keystroke.
+It can't turn a tree back into MyST yet: there are no `mdast-util-to-markdown` extensions, so `remark-stringify` doesn't know the MyST nodes.
 
 ## Run it
 
