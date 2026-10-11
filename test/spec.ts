@@ -7,7 +7,7 @@ import type { Root } from 'mdast';
 import { createTokenizer, tokensToMyst } from 'myst-parser';
 import { parse } from '../src/parse.ts';
 
-export type Case = { id: string; src: string };
+type Case = { id: string; src: string };
 
 const specPackage = createRequire(import.meta.url).resolve('myst-spec/package.json');
 const examples = path.join(path.dirname(specPackage), 'dist', 'examples');

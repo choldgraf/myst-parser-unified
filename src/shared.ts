@@ -6,7 +6,7 @@ import type { Code, Construct, Effects, State, TokenizeContext, TokenType } from
 
 const nameChar = /[a-zA-Z0-9_.\-+:]/;
 /** A character in a role or directive name */
-export const isNameChar = (code: Code) => code !== null && code > 0 && nameChar.test(String.fromCharCode(code));
+const isNameChar = (code: Code) => code !== null && code > 0 && nameChar.test(String.fromCharCode(code));
 
 /** A role or directive name and the `}` after it, as `nameType` and `markerType` tokens, then `ok` */
 export function factoryName(effects: Effects, ok: State, nok: State, nameType: TokenType, markerType: TokenType): State {
