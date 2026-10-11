@@ -6,7 +6,7 @@ import { compare, loadCases } from './spec.ts';
 const passing = new Set(JSON.parse(fs.readFileSync('scoreboard.json', 'utf8')) as string[]);
 const cases = loadCases().filter((c) => passing.has(c.id));
 
-test.each(cases.map((c) => [c.id, c] as const))('%s', (_, c) => {
+test.each(cases)('$id', (c) => {
   const { ours, reference } = compare(c);
   expect(ours).toEqual(reference);
 });
