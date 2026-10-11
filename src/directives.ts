@@ -134,6 +134,8 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
   }
 
   function bodyStart(code: Code) {
+    // An empty body at the end of the document would be an empty token, which micromark can't slice
+    if (code === codes.eof) return after(code);
     if (!inBody) {
       inBody = bodyOpen = true;
       // The mdast handler needs this to remove the indent from `value`

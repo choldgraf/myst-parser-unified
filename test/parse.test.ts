@@ -58,6 +58,8 @@ const syntax = [
   '````{a}\n```{b}\nX\n```\n````',
   '::::{a}\n:::{b}\nX\n:::\n::::',
   '```{note}\nunclosed',
+  '```{note}\n',
+  '```{a}\n```{b}\n```\nx',
   'Para\n```{note}\nX\n```',
   '> ```{note}\n> Hello\n> ```',
   '```{note}\n:class: a\n:class: b\n:flag:\n:x:   \n```',
