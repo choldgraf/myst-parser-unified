@@ -32,6 +32,7 @@ export function blocks(): Extension {
   };
 }
 
+// Label characters and the 100-character limit follow mystmd's TARGET_PATTERN (markdown-it-myst)
 const labelChar = /[a-zA-Z0-9|@<>*./_\-+:]/;
 const isLabelChar = (code: Code) => code !== null && code > 0 && labelChar.test(String.fromCharCode(code));
 

@@ -14,14 +14,16 @@ Both trees are from before directives and roles run, so they have generic `mystD
 We run mystmd's parser with `myst build`'s options: mystmd's defaults, which include smartquotes, plus linkify.
 We don't use the spec's expected trees, which are from after directives and roles run.
 
-`normalize()` ignores positions, because mystmd's nodes have line numbers but no columns.
-It also ignores fields that mdast sets to `null`, which mystmd leaves out.
-It also ignores `tight`, which mystmd sets on directives with no blank line around them.
+`normalize()` ignores:
+
+- Positions, because mystmd's nodes have line numbers but no columns.
+- Fields that mdast sets to `null`, which mystmd leaves out.
+- `tight`, which mystmd sets on directives with no blank line around them.
+
 [`test/parse.test.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/parse.test.ts) compares MyST syntax edge cases with mystmd in the same way.
 
 ## What an adapter would need to do
 
-The differences below go from most to fewest failing examples.
 The table at the end counts failing examples by where their tree first differs from mystmd's.
 
 Code `lang` and `meta`

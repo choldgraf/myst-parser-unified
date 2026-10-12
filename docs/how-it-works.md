@@ -57,7 +57,8 @@ Like a heading, each one can come right after a line of text, without a blank li
 - micromark checks for a list before it tries our constructs.
   So `+ + +` is a list here, and a block break in mystmd.
   Plain `+++` works in both.
-- `npm test` uses vitest, which loads micromark's development build. That build checks that tokenizers follow micromark's rules, and the normal build doesn't.
+- `npm test` uses vitest, which loads micromark's development build.
+  That build checks that tokenizers follow micromark's rules, and the normal build doesn't.
 
 ## Not supported yet
 
