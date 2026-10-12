@@ -3,7 +3,7 @@
 //   npm run score -- "<search>"   show why the first three examples whose id contains <search> don't match
 import assert from 'node:assert';
 import fs from 'node:fs';
-import { compare, firstDifference, loadCases } from '../test/spec.ts';
+import { compare, loadCases } from '../test/spec.ts';
 
 const search = process.argv[2];
 const cases = loadCases();
@@ -56,4 +56,29 @@ if (search !== undefined) {
   fs.mkdirSync('docs/data', { recursive: true });
   fs.writeFileSync('docs/data/files.json', JSON.stringify(files, null, 2) + '\n');
   fs.writeFileSync('docs/data/differences.json', JSON.stringify(groups, null, 2) + '\n');
+}
+
+/** Where two trees first differ, e.g. `>list>listItem(listItem).spread: false vs true` */
+function firstDifference(ours: any, reference: any, path = ''): string | undefined {
+  const show = (value: unknown) =>
+    JSON.stringify(typeof value === 'string' && value.length > 40 ? value.slice(0, 40) + '…' : value);
+  if (typeof ours !== 'object' || ours === null || typeof reference !== 'object' || reference === null) {
+    return ours === reference ? undefined : `${path}: ${show(ours)} vs ${show(reference)}`;
+  }
+  if (ours.type !== reference.type) return `${path}: type ${ours.type} vs ${reference.type}`;
+  const here = ours.type ? `${path}(${ours.type})` : path;
+  for (const key of new Set([...Object.keys(ours), ...Object.keys(reference)])) {
+    if (key === 'children') continue;
+    if (!(key in ours)) return `${here}.${key}: missing in ours`;
+    if (!(key in reference)) return `${here}.${key}: extra in ours`;
+    const difference = firstDifference(ours[key], reference[key], `${here}.${key}`);
+    if (difference) return difference;
+  }
+  const a = ours.children ?? [];
+  const b = reference.children ?? [];
+  for (let i = 0; i < Math.min(a.length, b.length); i++) {
+    const difference = firstDifference(a[i], b[i], `${path}>${a[i].type}`);
+    if (difference) return difference;
+  }
+  if (a.length !== b.length) return `${here}: ${a.length} vs ${b.length} children`;
 }
