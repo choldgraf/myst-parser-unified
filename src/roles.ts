@@ -96,18 +96,13 @@ function tokenizeRole(effects: Effects, ok: State, nok: State): State {
     return end(code);
   }
 
+  // The closing fence comes after the body, not in it
   function end(code: Code) {
     effects.exit('mystRoleBody');
-    effects.enter('mystRoleFence');
-    return closeFence(code);
+    return effects.attempt(closingFence, done, nok)(code);
   }
 
-  function closeFence(code: Code): State | undefined {
-    if (code === codes.graveAccent) {
-      effects.consume(code);
-      return closeFence;
-    }
-    effects.exit('mystRoleFence');
+  function done(code: Code) {
     effects.exit('mystRole');
     return ok(code);
   }
