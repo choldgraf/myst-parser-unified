@@ -104,7 +104,6 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
 
   function openEnd(code: Code) {
     effects.exit('mystDirectiveFence');
-    if (code === codes.eof) return after(code);
     if (self.interrupt) return ok(code);
     return effects.attempt(nonLazyLine, lineStart, after)(code);
   }
@@ -128,7 +127,6 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
   }
 
   function optionEnd(code: Code) {
-    if (code === codes.eof) return after(code);
     return effects.attempt(nonLazyLine, lineStart, after)(code);
   }
 
@@ -182,6 +180,7 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
     self.parser.lazy[token.start.line] = false;
   }
 
+  // Ended without a closing fence: the directive ends where the body does
   function after(code: Code) {
     if (inBody) effects.exit('mystDirectiveBody');
     return done(code);

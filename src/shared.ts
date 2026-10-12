@@ -6,6 +6,7 @@ import type { Code, Construct, Effects, State, TokenizeContext, TokenType } from
 
 /** A test for characters that match `re`, skipping micromark's negative codes for tabs and line endings */
 export const charClass = (re: RegExp) => (code: Code) => code !== null && code > 0 && re.test(String.fromCharCode(code));
+
 /** A character in a role or directive name */
 const isNameChar = charClass(/[a-zA-Z0-9_.\-+:]/);
 
@@ -35,7 +36,7 @@ export function factoryName(effects: Effects, ok: State, nok: State, nameType: T
 
 export const atLineEnd = (code: Code) => code === codes.eof || markdownLineEnding(code);
 
-/** A line ending, followed by a line that isn't a lazy continuation of a paragraph */
+/** A line ending (not the end of the file), followed by a line that isn't a lazy continuation of a paragraph */
 export const nonLazyLine: Construct = { tokenize: tokenizeNonLazyLine, partial: true };
 
 function tokenizeNonLazyLine(this: TokenizeContext, effects: Effects, ok: State, nok: State): State {
@@ -43,6 +44,7 @@ function tokenizeNonLazyLine(this: TokenizeContext, effects: Effects, ok: State,
   return start;
 
   function start(code: Code) {
+    if (code === codes.eof) return nok(code);
     effects.enter(types.lineEnding);
     effects.consume(code);
     effects.exit(types.lineEnding);

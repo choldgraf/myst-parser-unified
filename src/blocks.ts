@@ -96,7 +96,6 @@ function tokenizeComment(effects: Effects, ok: State, nok: State): State {
       return line;
     }
     effects.exit('mystCommentLine');
-    if (code === codes.eof) return end(code);
     return effects.attempt(nextLine, lineStart, end)(code);
   }
 
