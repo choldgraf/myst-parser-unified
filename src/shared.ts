@@ -4,9 +4,10 @@ import { markdownLineEnding } from 'micromark-util-character';
 import { codes, types } from 'micromark-util-symbol';
 import type { Code, Construct, Effects, State, TokenizeContext, TokenType } from 'micromark-util-types';
 
-const nameChar = /[a-zA-Z0-9_.\-+:]/;
+/** A test for characters that match `re`, skipping micromark's negative codes for tabs and line endings */
+export const charClass = (re: RegExp) => (code: Code) => code !== null && code > 0 && re.test(String.fromCharCode(code));
 /** A character in a role or directive name */
-const isNameChar = (code: Code) => code !== null && code > 0 && nameChar.test(String.fromCharCode(code));
+const isNameChar = charClass(/[a-zA-Z0-9_.\-+:]/);
 
 /** A role or directive name and the `}` after it, as `nameType` and `markerType` tokens, then `ok` */
 export function factoryName(effects: Effects, ok: State, nok: State, nameType: TokenType, markerType: TokenType): State {

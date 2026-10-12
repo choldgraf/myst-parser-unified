@@ -5,7 +5,7 @@ import { factorySpace } from 'micromark-factory-space';
 import { markdownSpace } from 'micromark-util-character';
 import { codes, types } from 'micromark-util-symbol';
 import type { Code, Construct, Effects, Extension, State } from 'micromark-util-types';
-import { atLineEnd, current, exit, nonLazyLine } from './shared.ts';
+import { atLineEnd, charClass, current, exit, nonLazyLine } from './shared.ts';
 
 declare module 'micromark-util-types' {
   interface TokenTypeMap {
@@ -33,8 +33,7 @@ export function blocks(): Extension {
 }
 
 // Label characters and the 100-character limit follow mystmd's TARGET_PATTERN (markdown-it-myst)
-const labelChar = /[a-zA-Z0-9|@<>*./_\-+:]/;
-const isLabelChar = (code: Code) => code !== null && code > 0 && labelChar.test(String.fromCharCode(code));
+const isLabelChar = charClass(/[a-zA-Z0-9|@<>*./_\-+:]/);
 
 // `(label)=`, with up to 100 characters in the label
 function tokenizeTarget(effects: Effects, ok: State, nok: State): State {
