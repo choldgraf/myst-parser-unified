@@ -52,7 +52,6 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
   let sizeOpen = 0;
   // Options can only come right after the opening fence, before the body
   let inBody = false;
-  let bodyOpen = false;
   let previous: MicromarkToken | undefined;
   return start;
 
@@ -119,8 +118,8 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
 
   // The closing fence comes after the body, not in it
   function close(code: Code) {
-    exitBody();
-    return effects.attempt(closingFence, after, nok)(code);
+    if (inBody) effects.exit('mystDirectiveBody');
+    return effects.attempt(closingFence, done, nok)(code);
   }
 
   function lineContent(code: Code) {
@@ -137,7 +136,7 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
     // An empty body at the end of the document would be an empty token, which micromark can't slice
     if (code === codes.eof) return after(code);
     if (!inBody) {
-      inBody = bodyOpen = true;
+      inBody = true;
       // The mdast handler needs this to remove the indent from `value`
       effects.enter('mystDirectiveBody', { _indent: initialSize } as Partial<MicromarkToken>);
     }
@@ -146,7 +145,6 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
 
   // Each line of the body is a chunk of document, linked to the one before, for micromark to parse later
   function chunkStart(code: Code) {
-    if (code === codes.eof) return after(code);
     if (markdownLineEnding(code)) return effects.check(nonLazyLine, chunkNonLazyStart, after)(code);
     return chunkNonLazyStart(code);
   }
@@ -184,13 +182,12 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
     self.parser.lazy[token.start.line] = false;
   }
 
-  function exitBody() {
-    if (bodyOpen) effects.exit('mystDirectiveBody');
-    bodyOpen = false;
+  function after(code: Code) {
+    if (inBody) effects.exit('mystDirectiveBody');
+    return done(code);
   }
 
-  function after(code: Code) {
-    exitBody();
+  function done(code: Code) {
     effects.exit('mystDirective');
     return ok(code);
   }
