@@ -23,17 +23,22 @@ if (search !== undefined) {
   console.log(`${failing.length} failing examples match "${search}"`);
 } else {
   const passing: string[] = [];
+  const totals = { myst: { pass: 0, total: 0 }, commonmark: { pass: 0, total: 0 } };
   const byFile = new Map<string, { pass: number; total: number }>();
   // Failing examples, grouped by where they first differ (quoted values and child counts removed)
   const differences = new Map<string, { count: number; example: string }>();
   for (const c of cases) {
     const { id } = c;
     const file = id.split(':')[0];
+    // The CommonMark spec is one file, and every other file is MyST's own examples
+    const section = file.startsWith('cmark_spec') ? totals.commonmark : totals.myst;
+    section.total++;
     const counts = byFile.get(file) ?? { pass: 0, total: 0 };
     counts.total++;
     const { ours, reference, match } = compare(c);
     if (match) {
       counts.pass++;
+      section.pass++;
       passing.push(id);
     } else {
       const signature = firstDifference(ours, reference)!
@@ -46,12 +51,18 @@ if (search !== undefined) {
     byFile.set(file, counts);
   }
   for (const [file, { pass, total }] of byFile) console.log(`${file.padEnd(36)} ${pass}/${total}`);
-  console.log(`\nTOTAL ${passing.length}/${cases.length}`);
-  fs.writeFileSync('scoreboard.json', JSON.stringify(passing, null, 2) + '\n');
+  console.log(`\nMyST ${totals.myst.pass}/${totals.myst.total}`);
+  console.log(`CommonMark ${totals.commonmark.pass}/${totals.commonmark.total}`);
+  console.log(`TOTAL ${passing.length}/${cases.length}`);
+  fs.writeFileSync('scoreboard.json', JSON.stringify({ ...totals, passing }, null, 2) + '\n');
 
   // Data for the docs site: myst-listing needs a `title` on every item
   const files = [...byFile].map(([title, counts]) => ({ title, ...counts }));
-  files.push({ title: 'TOTAL', pass: passing.length, total: cases.length });
+  files.push(
+    { title: 'MyST', ...totals.myst },
+    { title: 'CommonMark', ...totals.commonmark },
+    { title: 'TOTAL', pass: passing.length, total: cases.length },
+  );
   const groups = [...differences].map(([title, group]) => ({ title, ...group }));
   fs.mkdirSync('docs/data', { recursive: true });
   fs.writeFileSync('docs/data/files.json', JSON.stringify(files, null, 2) + '\n');

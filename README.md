@@ -9,13 +9,17 @@ This repo tests how hard it would be to parse MyST with micromark instead.
 To measure that, we parse the MyST in each [`myst-spec`](https://github.com/jupyter-book/mystmd/tree/main/packages/myst-spec/docs/examples) example with our parser and with mystmd's, and compare the two [mdast](https://github.com/syntax-tree/mdast) trees.
 The passing examples are in [`scoreboard.json`](scoreboard.json).
 
+**Score: 63 of 90 MyST examples match.**
+The 651 CommonMark spec examples are scored separately: 397 of them match.
+`npm run score` reproduces both numbers.
+
 ## What we found
 
 Every MyST syntax the spec uses, such as roles, directives, targets, comments and block breaks, works as a micromark extension, with exact positions.
 No example fails because of how MyST syntax is parsed.
 They fail because mystmd's tree isn't plain mdast: it uses curly quotes, sets list `spread` differently, turns bare URLs into links, nests content in `block` nodes, and so on.
 An adapter from mdast to mystmd's tree could fix those; [the differences page](docs/differences.md) lists them.
-Most of the examples are CommonMark's own spec, so the overall score mostly measures where markdown-it and micromark differ.
+The CommonMark score mostly measures where markdown-it and micromark differ.
 
 The docs cover:
 

@@ -8,7 +8,7 @@ title: myst-parser-unified
 
 ## Score per file
 
-Each row is a `myst-spec` example file, and the last row is the total.
+Each row is a `myst-spec` example file, and the last three rows are the MyST, CommonMark and combined totals.
 The numbers come from the last `npm run score`.
 
 :::{listing}
