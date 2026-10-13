@@ -473,7 +473,7 @@
   ],
   "adapted": {
     "myst": {
-      "pass": 76,
+      "pass": 77,
       "total": 90
     },
     "commonmark": {
@@ -1053,6 +1053,7 @@
       "directives.image: Image directive, left",
       "directives.math: Math directive",
       "directives.math: Math directive with label",
+      "directives.table: Basic table",
       "directives.table: Basic list table",
       "references.equations: Invalid equation reference",
       "references.equations: Default equation reference",

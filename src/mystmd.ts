@@ -13,6 +13,15 @@ function adapt(node: any): any {
   if (node.children) node.children = node.children.map(adapt);
   if (node.type === 'list') node.spread = false;
   if (node.type === 'listItem') node.spread = true;
+  if (node.type === 'table') {
+    node.children.forEach((row: any, r: number) =>
+      row.children.forEach((cell: any, i: number) => {
+        if (r === 0) cell.header = true;
+        if (node.align[i]) cell.align = node.align[i];
+      }),
+    );
+    delete node.align;
+  }
   if (node.type === 'yaml') Object.assign(node, { type: 'code', lang: 'yaml' });
   if (node.type === 'code') {
     node.lang ??= '';

@@ -64,6 +64,7 @@ Front matter
 
 Tables
 : mystmd puts `align` on each cell instead of the table, and marks the cells of the first row with `header: true`.
+  `toMystmd` does the same.
 
 A few examples fail for reasons an adapter can't fix:
 

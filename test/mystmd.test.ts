@@ -7,6 +7,7 @@ const cases = {
   'code lang and meta': '```\na\n```\n\n```js title="b"\nc\n```',
   'front matter': '---\ntitle: A\n---\n\nB',
   'list spread': '- a\n- b\n\n- c\n\n1. d',
+  'table align and header': '| a | b | c |\n| :- | -: | - |\n| d | e | f |',
 };
 
 test.each(Object.entries(cases))('%s', (_, src) => {
