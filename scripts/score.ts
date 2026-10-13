@@ -1,5 +1,5 @@
-// Compare our parser with mystmd's parser on every myst-spec example, without and with `toMystmd`,
-// and, after directives and roles run, with the spec's expected tree.
+// Compare our parser with mystmd's parser on every myst-spec example, without and with `toMystmd`;
+// after directives and roles run, with the spec's expected tree; and our `mystParse` with mystmd's, trees and messages.
 //   npm run score                 score per file, and update scoreboard.json and docs/data/
 //   npm run score -- "<search>"   show why the first three examples whose id contains <search> don't match
 import assert from 'node:assert';
@@ -23,7 +23,7 @@ if (search !== undefined) {
   }
   console.log(`${failing.length} failing examples match "${search}"`);
 } else {
-  const labels = { raw: 'raw', adapted: 'with toMystmd', transformed: 'after directives and roles' };
+  const labels = { raw: 'raw', adapted: 'with toMystmd', transformed: 'after directives and roles', dropin: 'mystParse' };
   const names = Object.keys(scorers) as (keyof typeof scorers)[];
   const scores = Object.fromEntries(
     names.map((name) => [name, { myst: { pass: 0, total: 0 }, commonmark: { pass: 0, total: 0 }, passing: [] as string[] }]),
@@ -35,7 +35,7 @@ if (search !== undefined) {
     const file = c.id.split(':')[0];
     // The CommonMark spec is one file, and every other file is MyST's own examples
     const key = file.startsWith('cmark_spec') ? 'commonmark' : 'myst';
-    const counts = byFile.get(file) ?? { raw: 0, adapted: 0, transformed: 0, total: 0 };
+    const counts = byFile.get(file) ?? { raw: 0, adapted: 0, transformed: 0, dropin: 0, total: 0 };
     byFile.set(file, counts);
     counts.total++;
     for (const name of names) {

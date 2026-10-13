@@ -4,12 +4,15 @@ import { createRequire } from 'node:module';
 import { isDeepStrictEqual } from 'node:util';
 import { load } from 'js-yaml';
 import type { Root } from 'mdast';
-import { createTokenizer, defaultOptions, tokensToMyst } from 'myst-parser';
-// applyDirectives and applyRoles aren't exported from myst-parser's main entry,
-// so package.json pins myst-parser to the exact version whose dist/ we import from.
-import { applyDirectives } from '../node_modules/myst-parser/dist/directives.js';
-import { applyRoles } from '../node_modules/myst-parser/dist/roles.js';
+import { createTokenizer, mystParse as mystmdParse, tokensToMyst } from 'myst-parser';
+import { buttonRole } from 'myst-ext-button';
+import { cardDirective } from 'myst-ext-card';
+import { exerciseDirectives } from 'myst-ext-exercise';
+import { gridDirectives } from 'myst-ext-grid';
+import { proofDirective } from 'myst-ext-proof';
+import { tabDirectives } from 'myst-ext-tabs';
 import { VFile } from 'vfile';
+import { applyDirectivesAndRoles, mystParse } from '../src/mystParse.ts';
 import { parse, toMystmd } from '../src/parse.ts';
 
 type Case = { id: string; src: string; mdast: Root };
@@ -44,28 +47,9 @@ export function mystmd(src: string, options?: { nestBlocks?: boolean }): Root {
   return tree;
 }
 
-/** Our tree after mystmd's directives and roles run, like mystmd's `mystParse` */
+/** Our tree after mystmd's directives and roles run */
 export function transformed(src: string): Root {
-  const tree = parse(src) as any;
-  // myst-parser's types want vfile@5; vfile@6 records its warnings the same way
-  const vfile = new VFile() as any;
-  applyDirectives(tree, defaultOptions.directives, vfile, {
-    // Parse a directive's nested content, with line numbers shifted to where it sits in the file
-    parseMyst: (source, lineOffset = 0) => {
-      const nested = transformed(source) as any;
-      const shift = (node: any) => {
-        if (node.position) {
-          node.position.start.line += lineOffset;
-          node.position.end.line += lineOffset;
-        }
-        node.children?.forEach(shift);
-      };
-      shift(nested);
-      return nested;
-    },
-  });
-  applyRoles(tree, defaultOptions.roles, vfile);
-  return tree;
+  return applyDirectivesAndRoles(parse(src), transformed);
 }
 
 /** Remove differences we don't care about; docs/differences.md says which and why. */
@@ -88,9 +72,33 @@ export function compareTransformed({ src, mdast }: Case) {
   return { ours, reference, match: isDeepStrictEqual(ours, reference) };
 }
 
-/** The scores: our tree, raw and after `toMystmd`, against mystmd's; and after directives and roles, against the spec's */
+// The options mystmd-client passes to `mystParse`: the extensions `myst build` turns on, plus linkify
+const extensions = {
+  markdownit: { linkify: true },
+  directives: [cardDirective, ...gridDirectives, ...tabDirectives, proofDirective, ...exerciseDirectives],
+  roles: [buttonRole],
+};
+
+/** What an editor shows for each message: its text, line, rule and whether it's an error */
+const messages = (vfile: VFile) => vfile.messages.map(({ reason, line, ruleId, fatal }) => ({ reason, line, ruleId, fatal }));
+
+/** Compare our `mystParse` with myst-parser's, called the same way: the trees and the messages */
+export function compareDropin({ src }: { src: string }) {
+  const parseWith = (parser: typeof mystParse) => {
+    const vfile = new VFile();
+    // myst-parser's types want vfile@5; vfile@6 records its messages the same way
+    const tree = normalize(parser(src, { ...extensions, vfile: vfile as any }));
+    return { tree, messages: messages(vfile) };
+  };
+  const ours = parseWith(mystParse);
+  const reference = parseWith(mystmdParse as typeof mystParse);
+  return { ours, reference, match: isDeepStrictEqual(ours, reference) };
+}
+
+/** The scores: our tree, raw and after `toMystmd`, against mystmd's; after directives and roles, against the spec's; and our `mystParse` against mystmd's */
 export const scorers = {
   raw: (c: Case) => compare(c),
   adapted: (c: Case) => compare(c, toMystmd),
   transformed: compareTransformed,
+  dropin: compareDropin,
 };
