@@ -6,7 +6,8 @@
     "score": "node scripts/score.ts",
     "docs": "npm run score && cd docs && myst build --html",
     "docs:live": "npm run score && cd docs && myst start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "corpus": "node scripts/corpus.ts"
   },
   "type": "module",
   "exports": {

@@ -18,6 +18,21 @@ mystmd's own parser doesn't match all of the spec's trees either, because the sp
 
 `npm run score` reproduces these numbers.
 
+We also compare both parsers on 599 `.md` files from real MyST projects: the mystmd, Jupyter Book and 2i2c docs, example-outputs, and three local docs folders.
+
+| Measure | Result |
+| --- | --- |
+| Files parsed (none threw) | 599 |
+| Raw trees matching mystmd's | 130 |
+| Files where every start line agrees with mystmd's | 270 |
+| Nodes whose start line differs | 8068 |
+| Parse time, ours (total / median per file) | 1004 ms / 0.45 ms |
+| Parse time, mystmd (total / median per file) | 523 ms / 0.24 ms |
+
+`MYST_CORPUS=<folder> npm run corpus` reproduces these numbers, and does nothing if `MYST_CORPUS` isn't set.
+The corpus isn't part of this repo, so CI doesn't run it.
+Start lines are compared only where both parsers record a position, because markdown-it records lines but not columns.
+
 ## What we found
 
 Every MyST syntax the spec uses, such as roles, directives, targets, comments and block breaks, works as a micromark extension, with exact positions.
@@ -59,6 +74,7 @@ You need Node 24 or later, which runs the TypeScript files directly.
 - `npm install`: install the dependencies.
 - `npm run score`: score every example, and write `scoreboard.json` and the data for the site.
 - `npm run score -- "<search>"`: show why the first three examples whose ID contains `<search>` don't match, like `npm run score -- "directives.figure"`.
+- `MYST_CORPUS=<folder> npm run corpus`: compare both parsers on every `.md` file in a folder of MyST projects.
 - `npm test`: check that positions are exact, that syntax edge cases parse like mystmd's parser, and that every example in `scoreboard.json` still passes.
 - `npm run typecheck`: check the types with TypeScript.
 - `npm run docs`: score, then build the [docs site](https://chrisholdgraf.com/myst-parser-unified/).
