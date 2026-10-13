@@ -12,7 +12,6 @@ Whether mystmd wants the adapter is mystmd's call.
 [`test/spec.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/spec.ts) parses each myst-spec example's source with our parser and with mystmd's `tokensToMyst`, and compares the two trees.
 Both trees are from before directives and roles run, so they have generic `mystDirective` and `mystRole` nodes.
 We run mystmd's parser with `myst build`'s options: mystmd's defaults, which include smartquotes, plus linkify.
-We don't use the spec's expected trees, which are from after directives and roles run.
 
 `normalize()` ignores:
 
@@ -21,6 +20,10 @@ We don't use the spec's expected trees, which are from after directives and role
 - `tight`, which mystmd sets on directives with no blank line around them.
 
 [`test/parse.test.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/parse.test.ts) compares MyST syntax edge cases with mystmd in the same way.
+
+A second score runs mystmd's `applyDirectives` and `applyRoles` on our tree, and compares it with the spec's expected tree, with the same `normalize()`.
+Some of the spec's trees are older than mystmd's parser, so mystmd's own `mystParse` doesn't match them either.
+The rest of this page is about the first comparison.
 
 ## What an adapter would need to do
 
