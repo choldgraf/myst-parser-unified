@@ -58,6 +58,7 @@ URL encoding
 
 Blocks
 : mystmd's `nestBlocks` puts the content after each `+++` in a `block` node, instead of a `blockBreak` node before it.
+  `toMystmd` does the same, and gives each `block` a position from its `+++` to the end of its content.
 
 Front matter
 : mystmd turns front matter into a `code` node with `lang: "yaml"`, where mdast has a `yaml` node.

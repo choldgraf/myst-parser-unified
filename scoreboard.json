@@ -473,7 +473,7 @@
   ],
   "adapted": {
     "myst": {
-      "pass": 79,
+      "pass": 83,
       "total": 90
     },
     "commonmark": {
@@ -481,6 +481,10 @@
       "total": 651
     },
     "passing": [
+      "blocks: block break node",
+      "blocks: block break node - with metadata",
+      "blocks: block break node - with broken metadata",
+      "blocks: block break nodes - dividing flow content",
       "cmark_spec_0.30: Tabs - example 1",
       "cmark_spec_0.30: Tabs - example 2",
       "cmark_spec_0.30: Tabs - example 3",

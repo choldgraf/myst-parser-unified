@@ -5,7 +5,27 @@ import type { Root } from 'mdast';
  * docs/differences.md lists what it changes, and what it can't.
  */
 export function toMystmd(tree: Root): Root {
-  return adapt(tree);
+  adapt(tree);
+  nestBlocks(tree);
+  return tree;
+}
+
+/** Put the content after each `+++` in a `block` node, which spans the `+++` and that content */
+function nestBlocks(tree: any) {
+  const children = [];
+  let block;
+  for (const node of tree.children) {
+    if (node.type === 'blockBreak') {
+      block = Object.assign(node, { type: 'block', children: [] });
+      children.push(block);
+    } else if (block) {
+      block.children.push(node);
+      block.position.end = { ...node.position.end };
+    } else {
+      children.push(node);
+    }
+  }
+  tree.children = children;
 }
 
 /** Adapt a node's children, then the node, and return the node that replaces it */
