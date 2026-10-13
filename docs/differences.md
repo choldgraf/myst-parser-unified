@@ -41,6 +41,7 @@ List `spread`
 Resolved references
 : mystmd turns `[text][ref]` into a `link` and `![alt][ref]` into an `image`, and drops the `definition` nodes.
   mdast keeps `linkReference`, `imageReference` and `definition`.
+  `toMystmd` does the same.
 
 Smartquotes
 : mystmd turns straight quotes into curly ones, and `...` into `…`.

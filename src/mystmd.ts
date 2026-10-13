@@ -5,7 +5,7 @@ import type { Root } from 'mdast';
  * docs/differences.md lists what it changes, and what it can't.
  */
 export function toMystmd(tree: Root): Root {
-  adapt(tree);
+  adapt(tree, findDefinitions(tree));
   nestBlocks(tree);
   return tree;
 }
@@ -28,9 +28,26 @@ function nestBlocks(tree: any) {
   tree.children = children;
 }
 
+/** Each definition by its identifier; the first one wins, like in CommonMark */
+function findDefinitions(node: any, found = new Map<string, any>()) {
+  if (node.type === 'definition' && !found.has(node.identifier)) found.set(node.identifier, node);
+  node.children?.forEach((child: any) => findDefinitions(child, found));
+  return found;
+}
+
 /** Adapt a node's children, then the node, and return the node that replaces it */
-function adapt(node: any): any {
-  if (node.children) node.children = node.children.map(adapt);
+function adapt(node: any, definitions: Map<string, any>): any {
+  if (node.children) {
+    node.children = node.children
+      .filter((child: any) => child.type !== 'definition')
+      .map((child: any) => adapt(child, definitions));
+  }
+  // Resolve references to links and images
+  if (node.type === 'linkReference' || node.type === 'imageReference') {
+    const { identifier, label, referenceType, ...rest } = node;
+    const { url, title } = definitions.get(identifier);
+    node = { ...rest, type: node.type === 'linkReference' ? 'link' : 'image', url, title };
+  }
   // Percent-encode URLs like markdown-it, which keeps escapes that are already there, like `%20`
   if (node.type === 'link' || node.type === 'image') node.url = encodeURI(node.url).replace(/%25([0-9a-f]{2})/gi, '%$1');
   if (node.type === 'list') node.spread = false;
