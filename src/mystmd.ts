@@ -42,7 +42,7 @@ function adapt(node: any, definitions: Map<string, any>): any {
       .filter((child: any) => child.type !== 'definition')
       .map((child: any) => adapt(child, definitions));
   }
-  // Resolve references to links and images
+  // Resolve references to links and images; micromark only makes a reference when its definition exists
   if (node.type === 'linkReference' || node.type === 'imageReference') {
     const { identifier, label, referenceType, ...rest } = node;
     const { url, title } = definitions.get(identifier);

@@ -4,6 +4,7 @@
 //   npm run score -- "<search>"   show why the first three examples whose id contains <search> don't match
 import assert from 'node:assert';
 import fs from 'node:fs';
+import { toMystmd } from '../src/parse.ts';
 import { compare, compareTransformed, loadCases } from '../test/spec.ts';
 
 const search = process.argv[2];
@@ -41,7 +42,7 @@ if (search !== undefined) {
     transformed[key].total++;
     const counts = byFile.get(file) ?? { pass: 0, adapted: 0, transformed: 0, total: 0 };
     counts.total++;
-    if (compare(c, true).match) {
+    if (compare(c, toMystmd).match) {
       counts.adapted++;
       adapted[key].pass++;
       adapted.passing.push(id);

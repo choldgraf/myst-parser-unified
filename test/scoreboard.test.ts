@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import { expect, test } from 'vitest';
+import { toMystmd } from '../src/parse.ts';
 import { compare, compareTransformed, loadCases } from './spec.ts';
 
 // Examples that matched when `npm run score` last ran must keep matching
@@ -19,7 +20,7 @@ test.each(cases.filter((c) => passing.has(c.id)))('$id', (c) => {
 });
 
 test.each(cases.filter((c) => adapted.has(c.id)))('with toMystmd: $id', (c) => {
-  const { ours, reference } = compare(c, true);
+  const { ours, reference } = compare(c, toMystmd);
   expect(ours).toEqual(reference);
 });
 

@@ -18,6 +18,12 @@ test.each(Object.entries(cases))('%s', (_, src) => {
   expect(normalize(toMystmd(parse(src)))).toEqual(normalize(mystmd(src)));
 });
 
+test('a block spans its +++ and its content', () => {
+  const [, block] = toMystmd(parse(cases.blocks)).children as any[];
+  expect(block.position.start.offset).toBe(3);
+  expect(block.position.end).toEqual(block.children.at(-1).position.end);
+});
+
 test('every node keeps a position', () => {
   const missing: string[] = [];
   const check = (node: any) => {
