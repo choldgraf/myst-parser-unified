@@ -6,6 +6,7 @@ import { mystmd, normalize } from './spec.ts';
 const cases = {
   'code lang and meta': '```\na\n```\n\n```js title="b"\nc\n```',
   'front matter': '---\ntitle: A\n---\n\nB',
+  'list spread': '- a\n- b\n\n- c\n\n1. d',
 };
 
 test.each(Object.entries(cases))('%s', (_, src) => {

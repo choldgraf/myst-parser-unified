@@ -36,6 +36,7 @@ Code `lang` and `meta`
 List `spread`
 : mystmd sets `spread: false` on every list and `spread: true` on every list item, whatever the blank lines.
   Its `listItemParagraphs` pass already wraps the text of tight list items in paragraphs, like mdast.
+  `toMystmd` sets `spread` the same way.
 
 Resolved references
 : mystmd turns `[text][ref]` into a `link` and `![alt][ref]` into an `image`, and drops the `definition` nodes.
