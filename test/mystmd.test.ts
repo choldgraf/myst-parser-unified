@@ -8,6 +8,7 @@ const cases = {
   'front matter': '---\ntitle: A\n---\n\nB',
   'list spread': '- a\n- b\n\n- c\n\n1. d',
   'table align and header': '| a | b | c |\n| :- | -: | - |\n| d | e | f |',
+  'images out of paragraphs': '![a](b.png)\n\n> ![c](d.png)\n\n![e](f.png) g',
 };
 
 test.each(Object.entries(cases))('%s', (_, src) => {

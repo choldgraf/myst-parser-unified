@@ -27,5 +27,7 @@ function adapt(node: any): any {
     node.lang ??= '';
     delete node.meta;
   }
+  // A paragraph with only an image becomes the image
+  if (node.type === 'paragraph' && node.children.length === 1 && node.children[0].type === 'image') return node.children[0];
   return node;
 }

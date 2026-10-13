@@ -47,6 +47,7 @@ Smartquotes
 
 Images out of paragraphs
 : mystmd's `hoistSingleImagesOutofParagraphs` replaces a paragraph that only has an image with the image.
+  `toMystmd` does the same.
 
 Linkify
 : `myst build` turns bare URLs like `www.example.com` into links, including in directive arguments like a figure's.

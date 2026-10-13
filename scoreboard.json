@@ -473,11 +473,11 @@
   ],
   "adapted": {
     "myst": {
-      "pass": 77,
+      "pass": 79,
       "total": 90
     },
     "commonmark": {
-      "pass": 529,
+      "pass": 535,
       "total": 651
     },
     "passing": [
@@ -954,6 +954,7 @@
       "cmark_spec_0.30: Links - example 516",
       "cmark_spec_0.30: Links - example 517",
       "cmark_spec_0.30: Links - example 518",
+      "cmark_spec_0.30: Links - example 519",
       "cmark_spec_0.30: Links - example 520",
       "cmark_spec_0.30: Links - example 521",
       "cmark_spec_0.30: Links - example 522",
@@ -964,7 +965,12 @@
       "cmark_spec_0.30: Links - example 547",
       "cmark_spec_0.30: Links - example 550",
       "cmark_spec_0.30: Links - example 551",
+      "cmark_spec_0.30: Images - example 571",
+      "cmark_spec_0.30: Images - example 573",
+      "cmark_spec_0.30: Images - example 574",
+      "cmark_spec_0.30: Images - example 577",
       "cmark_spec_0.30: Images - example 578",
+      "cmark_spec_0.30: Images - example 579",
       "cmark_spec_0.30: Autolinks - example 593",
       "cmark_spec_0.30: Autolinks - example 594",
       "cmark_spec_0.30: Autolinks - example 595",
@@ -1023,6 +1029,7 @@
       "commonmark.html: CommonMark HTML",
       "commonmark.links: CommonMark auto link",
       "commonmark.links: CommonMark inline link",
+      "commonmark.links: CommonMark inline image",
       "commonmark.lists: CommonMark bullet list",
       "commonmark.lists: CommonMark numbered list",
       "commonmark.paragraphs: CommonMark simple paragraph",
@@ -1049,6 +1056,7 @@
       "directives.code: Code-block directive shows line numbers without explicit linenos flag",
       "directives.generic: Unknown directive",
       "directives.generic: Unknown directive with args",
+      "directives.image: Standard markdown image",
       "directives.image: Image directive",
       "directives.image: Image directive, left",
       "directives.math: Math directive",
