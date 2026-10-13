@@ -10,7 +10,7 @@ import { createTokenizer, defaultOptions, tokensToMyst } from 'myst-parser';
 import { applyDirectives } from '../node_modules/myst-parser/dist/directives.js';
 import { applyRoles } from '../node_modules/myst-parser/dist/roles.js';
 import { VFile } from 'vfile';
-import { parse } from '../src/parse.ts';
+import { parse, toMystmd } from '../src/parse.ts';
 
 type Case = { id: string; src: string; mdast: Root };
 
@@ -87,3 +87,10 @@ export function compareTransformed({ src, mdast }: Case) {
   const reference = normalize(mdast);
   return { ours, reference, match: isDeepStrictEqual(ours, reference) };
 }
+
+/** The scores: our tree, raw and after `toMystmd`, against mystmd's; and after directives and roles, against the spec's */
+export const scorers = {
+  raw: (c: Case) => compare(c),
+  adapted: (c: Case) => compare(c, toMystmd),
+  transformed: compareTransformed,
+};

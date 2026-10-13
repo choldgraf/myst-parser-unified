@@ -4,8 +4,7 @@
 //   npm run score -- "<search>"   show why the first three examples whose id contains <search> don't match
 import assert from 'node:assert';
 import fs from 'node:fs';
-import { toMystmd } from '../src/parse.ts';
-import { compare, compareTransformed, loadCases } from '../test/spec.ts';
+import { compare, loadCases, scorers } from '../test/spec.ts';
 
 const search = process.argv[2];
 const cases = loadCases();
@@ -24,68 +23,57 @@ if (search !== undefined) {
   }
   console.log(`${failing.length} failing examples match "${search}"`);
 } else {
-  const passing: string[] = [];
-  const totals = { myst: { pass: 0, total: 0 }, commonmark: { pass: 0, total: 0 } };
-  const adapted = { myst: { pass: 0, total: 0 }, commonmark: { pass: 0, total: 0 }, passing: [] as string[] };
-  const transformed = { myst: { pass: 0, total: 0 }, commonmark: { pass: 0, total: 0 }, passing: [] as string[] };
-  const byFile = new Map<string, { pass: number; adapted: number; transformed: number; total: number }>();
-  // Failing examples, grouped by where they first differ (quoted values and child counts removed)
+  const labels = { raw: 'raw', adapted: 'with toMystmd', transformed: 'after directives and roles' };
+  const names = Object.keys(scorers) as (keyof typeof scorers)[];
+  const scores = Object.fromEntries(
+    names.map((name) => [name, { myst: { pass: 0, total: 0 }, commonmark: { pass: 0, total: 0 }, passing: [] as string[] }]),
+  ) as Record<keyof typeof scorers, { myst: { pass: number; total: number }; commonmark: { pass: number; total: number }; passing: string[] }>;
+  const byFile = new Map<string, Record<keyof typeof scorers | 'total', number>>();
+  // Failing raw examples, grouped by where they first differ (quoted values and child counts removed)
   const differences = new Map<string, { count: number; example: string }>();
   for (const c of cases) {
-    const { id } = c;
-    const file = id.split(':')[0];
+    const file = c.id.split(':')[0];
     // The CommonMark spec is one file, and every other file is MyST's own examples
     const key = file.startsWith('cmark_spec') ? 'commonmark' : 'myst';
-    const section = totals[key];
-    section.total++;
-    adapted[key].total++;
-    transformed[key].total++;
-    const counts = byFile.get(file) ?? { pass: 0, adapted: 0, transformed: 0, total: 0 };
-    counts.total++;
-    if (compare(c, toMystmd).match) {
-      counts.adapted++;
-      adapted[key].pass++;
-      adapted.passing.push(id);
-    }
-    if (compareTransformed(c).match) {
-      counts.transformed++;
-      transformed[key].pass++;
-      transformed.passing.push(id);
-    }
-    const { ours, reference, match } = compare(c);
-    if (match) {
-      counts.pass++;
-      section.pass++;
-      passing.push(id);
-    } else {
-      const signature = firstDifference(ours, reference)!
-        .replace(/"(?:[^"\\]|\\.)*"/g, '"…"')
-        .replace(/\d+ vs \d+ children/, 'N vs M children');
-      const group = differences.get(signature) ?? { count: 0, example: id };
-      group.count++;
-      differences.set(signature, group);
-    }
+    const counts = byFile.get(file) ?? { raw: 0, adapted: 0, transformed: 0, total: 0 };
     byFile.set(file, counts);
+    counts.total++;
+    for (const name of names) {
+      const { ours, reference, match } = scorers[name](c);
+      scores[name][key].total++;
+      if (match) {
+        counts[name]++;
+        scores[name][key].pass++;
+        scores[name].passing.push(c.id);
+      } else if (name === 'raw') {
+        const signature = firstDifference(ours, reference)!
+          .replace(/"(?:[^"\\]|\\.)*"/g, '"…"')
+          .replace(/\d+ vs \d+ children/, 'N vs M children');
+        const group = differences.get(signature) ?? { count: 0, example: c.id };
+        group.count++;
+        differences.set(signature, group);
+      }
+    }
   }
-  console.log(`${'file'.padEnd(36)} ${'raw'.padEnd(8)} ${'toMystmd'.padEnd(9)} after directives and roles`);
-  for (const [file, { pass, adapted: withAdapter, transformed: after, total }] of byFile) {
-    console.log(`${file.padEnd(36)} ${`${pass}/${total}`.padEnd(8)} ${`${withAdapter}/${total}`.padEnd(9)} ${after}/${total}`);
+  console.log(['file'.padEnd(36), ...names.map((name) => labels[name].padEnd(14))].join(' '));
+  for (const [file, counts] of byFile) {
+    console.log([file.padEnd(36), ...names.map((name) => `${counts[name]}/${counts.total}`.padEnd(14))].join(' '));
   }
   console.log('');
-  for (const [name, key] of [['MyST', 'myst'], ['CommonMark', 'commonmark']] as const) {
-    const { pass, total } = totals[key];
-    console.log(`${name} ${pass}/${total}, with toMystmd ${adapted[key].pass}/${total}, after directives and roles ${transformed[key].pass}/${total}`);
+  for (const [title, key] of [['MyST', 'myst'], ['CommonMark', 'commonmark']] as const) {
+    console.log(`${title} ${names.map((name) => `${labels[name]} ${scores[name][key].pass}/${scores[name][key].total}`).join(', ')}`);
   }
-  const total = cases.length;
-  console.log(`TOTAL ${passing.length}/${total}, with toMystmd ${adapted.passing.length}/${total}, after directives and roles ${transformed.passing.length}/${total}`);
-  fs.writeFileSync('scoreboard.json', JSON.stringify({ ...totals, passing, adapted, transformed }, null, 2) + '\n');
+  console.log(`TOTAL ${names.map((name) => `${labels[name]} ${scores[name].passing.length}/${cases.length}`).join(', ')}`);
+  fs.writeFileSync('scoreboard.json', JSON.stringify(scores, null, 2) + '\n');
 
   // Data for the docs site: myst-listing needs a `title` on every item
   const files = [...byFile].map(([title, counts]) => ({ title, ...counts }));
+  const row = (title: string, pass: (name: keyof typeof scorers) => number, total: number) =>
+    ({ title, ...Object.fromEntries(names.map((name) => [name, pass(name)])), total }) as (typeof files)[number];
   files.push(
-    { title: 'MyST', ...totals.myst, adapted: adapted.myst.pass, transformed: transformed.myst.pass },
-    { title: 'CommonMark', ...totals.commonmark, adapted: adapted.commonmark.pass, transformed: transformed.commonmark.pass },
-    { title: 'TOTAL', pass: passing.length, adapted: adapted.passing.length, transformed: transformed.passing.length, total },
+    row('MyST', (name) => scores[name].myst.pass, scores.raw.myst.total),
+    row('CommonMark', (name) => scores[name].commonmark.pass, scores.raw.commonmark.total),
+    row('TOTAL', (name) => scores[name].passing.length, cases.length),
   );
   const groups = [...differences].map(([title, group]) => ({ title, ...group }));
   fs.mkdirSync('docs/data', { recursive: true });
