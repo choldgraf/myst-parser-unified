@@ -1,6 +1,6 @@
 {
   "myst": {
-    "pass": 63,
+    "pass": 65,
     "total": 90
   },
   "commonmark": {
@@ -457,7 +457,9 @@
     "references.figures: Link-style figure reference with default ref",
     "references.figures: Link-style figure reference with custom ref",
     "references.headings: Default header reference",
+    "references.headings: Custom header reference",
     "references.headings: Link-style default header reference",
+    "references.headings: Link-style custom header reference",
     "references.target: Header with id label",
     "roles.generic: unknown role",
     "roles.html.abbr: Inline Abbreviation",

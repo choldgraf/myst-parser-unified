@@ -9,7 +9,7 @@ This repo tests how hard it would be to parse MyST with micromark instead.
 To measure that, we parse the MyST in each [`myst-spec`](https://github.com/jupyter-book/mystmd/tree/main/packages/myst-spec/docs/examples) example with our parser and with mystmd's, and compare the two [mdast](https://github.com/syntax-tree/mdast) trees.
 The passing examples are in [`scoreboard.json`](scoreboard.json).
 
-**Score: 63 of 90 MyST examples match.**
+**Score: 65 of 90 MyST examples match.**
 The 651 CommonMark spec examples are scored separately: 397 of them match.
 
 We also run mystmd's directives and roles on our tree, and compare the result with each spec example's expected tree.
@@ -23,7 +23,7 @@ We also compare both parsers on 599 `.md` files from real MyST projects: the mys
 | Measure | Result |
 | --- | --- |
 | Files parsed (none threw) | 599 |
-| Raw trees matching mystmd's | 130 |
+| Raw trees matching mystmd's | 142 |
 | Files where every start line agrees with mystmd's | 270 |
 | Nodes whose start line differs | 8068 |
 | Parse time, ours (total / median per file) | 1004 ms / 0.45 ms |

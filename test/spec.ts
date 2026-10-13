@@ -37,7 +37,11 @@ const tokenizer = createTokenizer({ markdownit: { linkify: true } });
 
 /** mystmd's parser output, before directives and roles run */
 export function mystmd(src: string, options?: { nestBlocks?: boolean }): Root {
-  return tokensToMyst(src, tokenizer.parse(src, {}), options) as any;
+  const tree = tokensToMyst(src, tokenizer.parse(src, {}), options) as any;
+  // A directive's nested parse turns on markdown-it's replacements, like `--` to `–`, for every later parse.
+  // `myst build` makes a tokenizer per file, so it never gets to replace anything.
+  tokenizer.disable('replacements');
+  return tree;
 }
 
 /** Our tree after mystmd's directives and roles run, like mystmd's `mystParse` */
