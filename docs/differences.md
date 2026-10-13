@@ -59,6 +59,7 @@ Blocks
 
 Front matter
 : mystmd turns front matter into a `code` node with `lang: "yaml"`, where mdast has a `yaml` node.
+  `toMystmd` does the same.
 
 Tables
 : mystmd puts `align` on each cell instead of the table, and marks the cells of the first row with `header: true`.

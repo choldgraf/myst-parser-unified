@@ -5,6 +5,7 @@ import { mystmd, normalize } from './spec.ts';
 // One source per difference that toMystmd handles; docs/differences.md describes each
 const cases = {
   'code lang and meta': '```\na\n```\n\n```js title="b"\nc\n```',
+  'front matter': '---\ntitle: A\n---\n\nB',
 };
 
 test.each(Object.entries(cases))('%s', (_, src) => {

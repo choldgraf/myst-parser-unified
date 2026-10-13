@@ -11,6 +11,7 @@ export function toMystmd(tree: Root): Root {
 /** Adapt a node's children, then the node, and return the node that replaces it */
 function adapt(node: any): any {
   if (node.children) node.children = node.children.map(adapt);
+  if (node.type === 'yaml') Object.assign(node, { type: 'code', lang: 'yaml' });
   if (node.type === 'code') {
     node.lang ??= '';
     delete node.meta;

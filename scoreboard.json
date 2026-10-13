@@ -477,7 +477,7 @@
       "total": 90
     },
     "commonmark": {
-      "pass": 468,
+      "pass": 470,
       "total": 651
     },
     "passing": [
@@ -562,7 +562,9 @@
       "cmark_spec_0.30: Setext headings - example 92",
       "cmark_spec_0.30: Setext headings - example 93",
       "cmark_spec_0.30: Setext headings - example 95",
+      "cmark_spec_0.30: Setext headings - example 96",
       "cmark_spec_0.30: Setext headings - example 97",
+      "cmark_spec_0.30: Setext headings - example 98",
       "cmark_spec_0.30: Setext headings - example 100",
       "cmark_spec_0.30: Setext headings - example 101",
       "cmark_spec_0.30: Setext headings - example 102",
