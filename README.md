@@ -12,6 +12,9 @@ The passing examples are in [`scoreboard.json`](scoreboard.json).
 **Score: 65 of 90 MyST examples match.**
 The 651 CommonMark spec examples are scored separately: 397 of them match.
 
+`toMystmd(tree)` is an optional pass that turns our tree into the shape mystmd's parser builds.
+**With `toMystmd`: 83 of 90 MyST examples and 620 of 651 CommonMark examples match.**
+
 We also run mystmd's directives and roles on our tree, and compare the result with each spec example's expected tree.
 **After directives and roles: 57 of 90 MyST examples and 421 of 651 CommonMark examples match.**
 mystmd's own parser doesn't match all of the spec's trees either, because the spec is older than the parser.
@@ -24,6 +27,7 @@ We also compare both parsers on 599 `.md` files from real MyST projects: the mys
 | --- | --- |
 | Files parsed (none threw) | 599 |
 | Raw trees matching mystmd's | 142 |
+| Trees matching mystmd's with `toMystmd` | 265 |
 | Files where every start line agrees with mystmd's | 270 |
 | Nodes whose start line differs | 8068 |
 | Parse time, ours (total / median per file) | 1004 ms / 0.45 ms |
@@ -38,27 +42,29 @@ Start lines are compared only where both parsers record a position, because mark
 Every MyST syntax the spec uses, such as roles, directives, targets, comments and block breaks, works as a micromark extension, with exact positions.
 No example fails because of how MyST syntax is parsed.
 They fail because mystmd's tree isn't plain mdast: it uses curly quotes, sets list `spread` differently, turns bare URLs into links, nests content in `block` nodes, and so on.
-An adapter from mdast to mystmd's tree could fix those; [the differences page](docs/differences.md) lists them.
+`toMystmd` fixes most of those, but not curly quotes or bare URLs; [the differences page](docs/differences.md) lists them.
 The CommonMark score mostly measures where markdown-it and micromark differ.
 
 The docs cover:
 
 - [How the parser works](docs/how-it-works.md): one micromark extension per MyST syntax.
-- [Why examples fail](docs/differences.md): what an adapter from mdast to mystmd's tree would change.
+- [Why examples fail](docs/differences.md): what `toMystmd` changes, and what it can't.
 - [What isn't supported yet](docs/how-it-works.md#not-supported-yet), with an effort estimate for each.
 - [What was hard about micromark](docs/how-it-works.md#notes-on-micromark).
 
 ## Use it
 
-`parse(src)` returns an mdast tree, and the `remarkMyst` plugin adds the same MyST syntax to remark:
+`parse(src)` returns an mdast tree, and the `remarkMyst` plugin adds the same MyST syntax to remark.
+`toMystmd(tree)` changes a tree, in place, into mystmd's shape:
 
 ```js
-import { parse, remarkMyst } from 'myst-parser-unified';
+import { parse, remarkMyst, toMystmd } from 'myst-parser-unified';
 import remarkParse from 'remark-parse';
 import { unified } from 'unified';
 
 const tree = parse(src);
 const sameTree = unified().use(remarkParse).use(remarkMyst).parse(src);
+const mystmdTree = toMystmd(parse(src));
 ```
 
 It isn't on npm, so install it with `npm install github:choldgraf/myst-parser-unified`.

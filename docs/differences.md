@@ -4,6 +4,8 @@ An example passes when our tree is the same as the one mystmd's own parser build
 Our tree is standard [mdast](https://github.com/syntax-tree/mdast).
 mystmd's parser also runs a few extra passes, like smartquotes and resolving references.
 So each difference below is something an adapter from mdast to mystmd's shape would need to do.
+`toMystmd(tree)` is that adapter: an optional pass that changes the tree from `parse` in place.
+Each difference says whether `toMystmd` handles it.
 This parser keeps emitting mdast.
 Whether mystmd wants the adapter is mystmd's call.
 
@@ -12,6 +14,8 @@ Whether mystmd wants the adapter is mystmd's call.
 [`test/spec.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/spec.ts) parses each myst-spec example's source with our parser and with mystmd's `tokensToMyst`, and compares the two trees.
 Both trees are from before directives and roles run, so they have generic `mystDirective` and `mystRole` nodes.
 We run mystmd's parser with `myst build`'s options: mystmd's defaults, which include smartquotes, plus linkify.
+A directive's nested parse turns on markdown-it's replacements, like `--` to `–`, for every later parse with the same parser.
+`myst build` makes a new parser for each file, so it never replaces anything, and we turn replacements back off after each parse.
 
 `normalize()` ignores:
 
@@ -23,7 +27,8 @@ We run mystmd's parser with `myst build`'s options: mystmd's defaults, which inc
 
 A second score runs mystmd's `applyDirectives` and `applyRoles` on our tree, and compares it with the spec's expected tree, with the same `normalize()`.
 Some of the spec's trees are older than mystmd's parser, so mystmd's own `mystParse` doesn't match them either.
-The rest of this page is about the first comparison.
+A third score runs `toMystmd` on our tree, and compares it with mystmd's tree like the first.
+The rest of this page is about the first and third comparisons.
 
 ## What an adapter would need to do
 
@@ -44,7 +49,11 @@ Resolved references
   `toMystmd` does the same.
 
 Smartquotes
-: mystmd turns straight quotes into curly ones, and `...` into `…`.
+: mystmd turns straight quotes into curly ones, and apostrophes into `’`.
+  `toMystmd` doesn't do this.
+  markdown-it picks an opening quote, a closing quote or an apostrophe from the characters on each side, across emphasis, links and inline code, and pairs quotes up by nesting level.
+  It also leaves escaped quotes like `\"` alone, and mdast text doesn't show which quotes were escaped.
+  So an adapter would need the source as well as the tree, and a port of markdown-it's `smartquotes` rule.
 
 Images out of paragraphs
 : mystmd's `hoistSingleImagesOutofParagraphs` replaces a paragraph that only has an image with the image.
@@ -53,6 +62,8 @@ Images out of paragraphs
 Linkify
 : `myst build` turns bare URLs like `www.example.com` into links, including in directive arguments like a figure's.
   `micromark-extension-gfm-autolink-literal` does something similar, with different rules.
+  `toMystmd` doesn't do this.
+  It would need markdown-it's `linkify-it`, which finds links with its own rules and a list of top-level domains.
 
 URL encoding
 : mystmd percent-encodes link URLs, like `/föö` to `/f%C3%B6%C3%B6`.
