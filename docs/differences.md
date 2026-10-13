@@ -28,7 +28,8 @@ A directive's nested parse turns on markdown-it's replacements, like `--` to `�
 A second score runs mystmd's `applyDirectives` and `applyRoles` on our tree, and compares it with the spec's expected tree, with the same `normalize()`.
 Some of the spec's trees are older than mystmd's parser, so mystmd's own `mystParse` doesn't match them either.
 A third score runs `toMystmd` on our tree, and compares it with mystmd's tree like the first.
-The rest of this page is about the first and third comparisons.
+A fourth score compares our `mystParse` with mystmd's, trees and messages.
+The next section is about the first and third comparisons, and the [`mystParse`](#mystparse) section about the fourth.
 
 ## What an adapter would need to do
 
@@ -64,6 +65,7 @@ Linkify
   `micromark-extension-gfm-autolink-literal` does something similar, with different rules.
   `toMystmd` doesn't do this.
   It would need markdown-it's `linkify-it`, which finds links with its own rules and a list of top-level domains.
+  So `mystParse` accepts `markdownit: { linkify: true }` and ignores it.
 
 URL encoding
 : mystmd percent-encodes link URLs, like `/föö` to `/f%C3%B6%C3%B6`.
@@ -90,6 +92,32 @@ A few examples fail for reasons an adapter can't fix:
 
 - micromark follows CommonMark 0.31.2 and markdown-it follows 0.30, which ended HTML comments differently.
 - markdown-it drops the last line ending of an HTML block at the end of a file.
+
+## `mystParse`
+
+`mystParse(src, { directives, roles, vfile, markdownit })` in [`src/mystParse.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/mystParse.ts) is a drop-in for myst-parser's `mystParse`.
+It runs `parse`, then `toMystmd`, then mystmd's `applyDirectives` and `applyRoles`.
+Like myst-parser, it adds mystmd's default directives and roles to the ones you pass, and parses a directive's nested content with the same options.
+
+The `dropin` score calls both with the options `mystmd-client` uses: the directives and roles of the extensions `myst build` turns on, `linkify: true`, and a new vfile for each example.
+An example passes when the trees match after `normalize()`, and the messages match in order on their text, line, rule and whether they're an error.
+Columns aren't compared, because mystmd's messages often have column 1 where ours have the real column, like for a role in a `list-table` cell.
+
+Every example that fails also fails with `toMystmd`, for the reasons above; the one MyST example is smartquotes.
+Six MyST examples that fail with `toMystmd` pass here, because the directive throws away the part that differed, like a figure's linkified argument.
+mystmd writes messages on three examples, for an unknown directive or role, and ours are the same.
+[`test/mystParse.test.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/mystParse.test.ts) checks a few more: option errors, nested directives, and roles in directive bodies and `list-table` cells.
+
+What it doesn't do the same:
+
+- `markdownit` is accepted and ignored, because our parser isn't markdown-it.
+- It doesn't take myst-parser's `mdast` and `extensions` options.
+- mystmd's tokenizer writes a message for YAML options it can't read and for a directive it can't parse, and ours doesn't, because our parser doesn't [support YAML options](how-it-works.md#not-supported-yet) yet.
+- It only runs in Node, because it finds myst-parser's files with `node:module`.
+
+Messages go to the `vfile` you pass, through myst-parser's code, which only calls `vfile.message()`.
+So a `vfile@5`, which myst-parser's types ask for, and a `vfile@6`, which needs a cast in TypeScript, both get the same messages as with mystmd.
+Without a `vfile`, it makes one with myst-parser's own `vfile`, like myst-parser does.
 
 ## Where the trees first differ
 

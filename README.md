@@ -19,6 +19,9 @@ We also run mystmd's directives and roles on our tree, and compare the result wi
 **After directives and roles: 57 of 90 MyST examples and 421 of 651 CommonMark examples match.**
 mystmd's own parser doesn't match all of the spec's trees either, because the spec is older than the parser.
 
+`mystParse` is a drop-in for myst-parser's `mystParse`, and we compare the two, called the same way, on each example: the trees and the messages.
+**With `mystParse`: 89 of 90 MyST examples and 624 of 651 CommonMark examples match.**
+
 `npm run score` reproduces these numbers.
 
 We also compare both parsers on 599 `.md` files from real MyST projects: the mystmd, Jupyter Book and 2i2c docs, example-outputs, and three local docs folders.
@@ -67,6 +70,19 @@ const sameTree = unified().use(remarkParse).use(remarkMyst).parse(src);
 const mystmdTree = toMystmd(parse(src));
 ```
 
+`mystParse` from `myst-parser-unified/mystmd` takes myst-parser's `directives`, `roles`, `vfile` and `markdownit` options, returns the same tree as myst-parser's `mystParse`, and writes the same messages to `vfile`:
+
+```js
+import { mystParse } from 'myst-parser-unified/mystmd';
+
+const tree = mystParse(src, { directives, roles, vfile, markdownit: { linkify: true } });
+```
+
+It runs mystmd's directives and roles, which aren't part of myst-parser's public API.
+So it needs `myst-parser` installed at exactly 1.7.4, a peer dependency: other versions may move or change the files it loads.
+It only runs in Node, and the main entry doesn't need `myst-parser`.
+[The differences page](docs/differences.md#mystparse) says what it doesn't do the same.
+
 It isn't on npm, so install it with `npm install github:choldgraf/myst-parser-unified`.
 It's written in TypeScript, and Node won't run TypeScript from `node_modules`.
 So use it from a bundler or a workspace.
@@ -81,7 +97,7 @@ You need Node 24 or later, which runs the TypeScript files directly.
 - `npm run score`: score every example, and write `scoreboard.json` and the data for the site.
 - `npm run score -- "<search>"`: show why the first three examples whose ID contains `<search>` don't match, like `npm run score -- "directives.figure"`.
 - `MYST_CORPUS=<folder> npm run corpus`: compare both parsers on every `.md` file in a folder of MyST projects.
-- `npm test`: check that positions are exact, that syntax edge cases parse like mystmd's parser, and that every example in `scoreboard.json` still passes.
+- `npm test`: check that positions are exact, that syntax edge cases parse like mystmd's parser, that `mystParse` writes the same messages as mystmd's, and that every example in `scoreboard.json` still passes.
 - `npm run typecheck`: check the types with TypeScript.
 - `npm run docs`: score, then build the [docs site](https://chrisholdgraf.com/myst-parser-unified/).
 - `npm run docs:live`: score, then serve the site locally.
