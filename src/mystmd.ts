@@ -31,6 +31,8 @@ function nestBlocks(tree: any) {
 /** Adapt a node's children, then the node, and return the node that replaces it */
 function adapt(node: any): any {
   if (node.children) node.children = node.children.map(adapt);
+  // Percent-encode URLs like markdown-it, which keeps escapes that are already there, like `%20`
+  if (node.type === 'link' || node.type === 'image') node.url = encodeURI(node.url).replace(/%25([0-9a-f]{2})/gi, '%$1');
   if (node.type === 'list') node.spread = false;
   if (node.type === 'listItem') node.spread = true;
   if (node.type === 'table') {

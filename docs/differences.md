@@ -55,6 +55,8 @@ Linkify
 
 URL encoding
 : mystmd percent-encodes link URLs, like `/föö` to `/f%C3%B6%C3%B6`.
+  `toMystmd` does the same for links and images.
+  It doesn't turn non-ASCII host names into punycode, like `http://föö.com` to `http://xn--f-1gaa.com`, which markdown-it also does.
 
 Blocks
 : mystmd's `nestBlocks` puts the content after each `+++` in a `block` node, instead of a `blockBreak` node before it.

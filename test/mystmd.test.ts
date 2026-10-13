@@ -10,6 +10,7 @@ const cases = {
   'table align and header': '| a | b | c |\n| :- | -: | - |\n| d | e | f |',
   'images out of paragraphs': '![a](b.png)\n\n> ![c](d.png)\n\n![e](f.png) g',
   'blocks': 'a\n\n+++ {"b": 1}\n\nc\n\nd\n\n+++\n\n+++\ne',
+  'URL encoding': '[a](/föö?b=\\\\*&c=%20 "d") ![e](<f g.png>)',
 };
 
 test.each(Object.entries(cases))('%s', (_, src) => {
