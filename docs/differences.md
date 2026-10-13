@@ -31,6 +31,7 @@ The table at the end counts failing examples by where their tree first differs f
 
 Code `lang` and `meta`
 : mystmd sets `lang: ""` on code with no language, and drops `meta`, the text after the language.
+  `toMystmd` does the same.
 
 List `spread`
 : mystmd sets `spread: false` on every list and `spread: true` on every list item, whatever the blank lines.

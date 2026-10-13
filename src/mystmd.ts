@@ -5,5 +5,15 @@ import type { Root } from 'mdast';
  * docs/differences.md lists what it changes, and what it can't.
  */
 export function toMystmd(tree: Root): Root {
-  return tree;
+  return adapt(tree);
+}
+
+/** Adapt a node's children, then the node, and return the node that replaces it */
+function adapt(node: any): any {
+  if (node.children) node.children = node.children.map(adapt);
+  if (node.type === 'code') {
+    node.lang ??= '';
+    delete node.meta;
+  }
+  return node;
 }
