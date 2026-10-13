@@ -477,7 +477,7 @@
       "total": 90
     },
     "commonmark": {
-      "pass": 620,
+      "pass": 624,
       "total": 651
     },
     "passing": [
@@ -812,7 +812,9 @@
       "cmark_spec_0.30: Code spans - example 332",
       "cmark_spec_0.30: Code spans - example 333",
       "cmark_spec_0.30: Code spans - example 334",
+      "cmark_spec_0.30: Code spans - example 335",
       "cmark_spec_0.30: Code spans - example 336",
+      "cmark_spec_0.30: Code spans - example 337",
       "cmark_spec_0.30: Code spans - example 338",
       "cmark_spec_0.30: Code spans - example 339",
       "cmark_spec_0.30: Code spans - example 340",
@@ -1094,6 +1096,8 @@
       "cmark_spec_0.30: Hard line breaks - example 637",
       "cmark_spec_0.30: Hard line breaks - example 638",
       "cmark_spec_0.30: Hard line breaks - example 639",
+      "cmark_spec_0.30: Hard line breaks - example 640",
+      "cmark_spec_0.30: Hard line breaks - example 641",
       "cmark_spec_0.30: Hard line breaks - example 642",
       "cmark_spec_0.30: Hard line breaks - example 643",
       "cmark_spec_0.30: Hard line breaks - example 644",

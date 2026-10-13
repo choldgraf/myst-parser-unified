@@ -50,6 +50,7 @@ function adapt(node: any, definitions: Map<string, any>): any {
   }
   // Percent-encode URLs like markdown-it, which keeps escapes that are already there, like `%20`
   if (node.type === 'link' || node.type === 'image') node.url = encodeURI(node.url).replace(/%25([0-9a-f]{2})/gi, '%$1');
+  if (node.type === 'inlineCode') node.value = node.value.replace(/\r?\n|\r/g, ' ');
   if (node.type === 'list') node.spread = false;
   if (node.type === 'listItem') node.spread = true;
   if (node.type === 'table') {

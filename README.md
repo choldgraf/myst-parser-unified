@@ -13,7 +13,7 @@ The passing examples are in [`scoreboard.json`](scoreboard.json).
 The 651 CommonMark spec examples are scored separately: 397 of them match.
 
 `toMystmd(tree)` is an optional pass that turns our tree into the shape mystmd's parser builds.
-**With `toMystmd`: 83 of 90 MyST examples and 620 of 651 CommonMark examples match.**
+**With `toMystmd`: 83 of 90 MyST examples and 624 of 651 CommonMark examples match.**
 
 We also run mystmd's directives and roles on our tree, and compare the result with each spec example's expected tree.
 **After directives and roles: 57 of 90 MyST examples and 421 of 651 CommonMark examples match.**

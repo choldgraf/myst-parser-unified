@@ -78,6 +78,10 @@ Front matter
 : mystmd turns front matter into a `code` node with `lang: "yaml"`, where mdast has a `yaml` node.
   `toMystmd` does the same.
 
+Inline code
+: mdast keeps line endings inside inline code, and markdown-it turns them into spaces.
+  `toMystmd` does the same.
+
 Tables
 : mystmd puts `align` on each cell instead of the table, and marks the cells of the first row with `header: true`.
   `toMystmd` does the same.
@@ -85,7 +89,6 @@ Tables
 A few examples fail for reasons an adapter can't fix:
 
 - micromark follows CommonMark 0.31.2 and markdown-it follows 0.30, which ended HTML comments differently.
-- mdast keeps line endings inside inline code, and markdown-it turns them into spaces.
 - markdown-it drops the last line ending of an HTML block at the end of a file.
 
 ## Where the trees first differ
