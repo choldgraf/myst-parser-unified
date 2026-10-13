@@ -15,6 +15,8 @@ import { blocks, blocksFromMarkdown } from './blocks.ts';
 import { directive, directiveFromMarkdown } from './directives.ts';
 import { role, roleFromMarkdown } from './roles.ts';
 
+export { toMystmd } from './mystmd.ts';
+
 // Each syntax has a micromark extension, which tokenizes it, and an mdast extension, which turns its tokens into nodes
 const syntaxes: [Extension, FromMarkdownExtension][] = [
   [frontmatter(), frontmatterFromMarkdown()],

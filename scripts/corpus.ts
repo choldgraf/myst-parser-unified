@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
-import { parse } from '../src/parse.ts';
+import { parse, toMystmd } from '../src/parse.ts';
 import { mystmd, normalize } from '../test/spec.ts';
 
 const corpus = process.env.MYST_CORPUS;
@@ -19,6 +19,7 @@ const files = fs.globSync('**/*.md', {
 const times = { ours: [] as number[], mystmd: [] as number[] };
 const throws = { ours: 0, mystmd: 0 };
 let matching = 0;
+let adaptedMatching = 0;
 let linesAgree = 0;
 let nodesDisagree = 0;
 
@@ -51,10 +52,14 @@ for (const file of files) {
   if (!ours || !reference) continue;
   const match = isDeepStrictEqual(normalize(ours), normalize(reference));
   const disagree = lineDisagreements(ours, reference);
+  // Last, because toMystmd changes our tree
+  const adaptedMatch = isDeepStrictEqual(normalize(toMystmd(ours)), normalize(reference));
   if (match) matching++;
+  if (adaptedMatch) adaptedMatching++;
   if (!disagree) linesAgree++;
   nodesDisagree += disagree;
-  if (!match || disagree) console.log(`${file}: ${match ? 'tree matches' : 'tree differs'}, ${disagree} start lines differ`);
+  const tree = match ? 'tree matches' : adaptedMatch ? 'tree matches with toMystmd' : 'tree differs';
+  if (!adaptedMatch || disagree) console.log(`${file}: ${tree}, ${disagree} start lines differ`);
 }
 
 const sum = (values: number[]) => values.reduce((a, b) => a + b, 0);
@@ -62,7 +67,7 @@ const median = (values: number[]) => [...values].sort((a, b) => a - b)[Math.floo
 console.log(`
 files parsed            ${files.length}
 throws                  ours ${throws.ours}, mystmd ${throws.mystmd}
-trees matching          ${matching}
+trees matching          ${matching}, with toMystmd ${adaptedMatching}
 start lines all agree   ${linesAgree}
 nodes disagreeing       ${nodesDisagree}
 ours total / median     ${sum(times.ours).toFixed(0)} ms / ${median(times.ours).toFixed(2)} ms

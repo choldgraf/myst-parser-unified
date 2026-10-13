@@ -10,7 +10,7 @@ import { createTokenizer, defaultOptions, tokensToMyst } from 'myst-parser';
 import { applyDirectives } from '../node_modules/myst-parser/dist/directives.js';
 import { applyRoles } from '../node_modules/myst-parser/dist/roles.js';
 import { VFile } from 'vfile';
-import { parse } from '../src/parse.ts';
+import { parse, toMystmd } from '../src/parse.ts';
 
 type Case = { id: string; src: string; mdast: Root };
 
@@ -74,9 +74,9 @@ export function normalize(tree: Root): Root {
   return JSON.parse(JSON.stringify(tree, (key, value) => (ignore(key, value) ? undefined : value)));
 }
 
-/** Compare our tree with mystmd's, for a spec example's source */
-export function compare({ src }: Case) {
-  const ours = normalize(parse(src));
+/** Compare our tree, or with `adapt` our tree after `toMystmd`, with mystmd's, for a spec example's source */
+export function compare({ src }: Case, adapt = false) {
+  const ours = normalize(adapt ? toMystmd(parse(src)) : parse(src));
   const reference = normalize(mystmd(src));
   return { ours, reference, match: isDeepStrictEqual(ours, reference) };
 }
