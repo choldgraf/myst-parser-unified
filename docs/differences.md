@@ -110,6 +110,15 @@ Definition lists parse like mystmd's, with two differences that come from markdo
 - A term and a description indented inside a description, right after its text, stay text in both parsers.
   But for `Term\n: Text\n  Term 2\n  : Text 2`, mystmd's text is `Text\nTerm 2: Text 2`, without the line ending before the `:`.
 
+## Math
+
+Dollar math and amsmath environments parse like mystmd's, with two differences:
+
+- In a list item or block quote, mystmd keeps the container's indent or `> ` in a math block's `value`, because markdown-it slices the value from the source.
+  Here the value is just the math, like a code block's value.
+- In a tight list item, mystmd moves `$$x$$` out of its paragraph, because its `listItemParagraphs` pass doesn't count a `math` node as inline content.
+  Here it stays in the paragraph, like in a loose list item, and `toMystmd` doesn't move it.
+
 ## `mystParse`
 
 `mystParse(src, { directives, roles, vfile, markdownit })` in [`src/mystParse.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/mystParse.ts) is a drop-in for myst-parser's `mystParse`.

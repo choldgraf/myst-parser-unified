@@ -29,12 +29,12 @@ We also compare both parsers on 599 `.md` files from real MyST projects: the mys
 | Measure | Result |
 | --- | --- |
 | Files parsed (none threw) | 599 |
-| Raw trees matching mystmd's | 156 |
-| Trees matching mystmd's with `toMystmd` | 284 |
+| Raw trees matching mystmd's | 157 |
+| Trees matching mystmd's with `toMystmd` | 290 |
 | Files where every start line agrees with mystmd's | 270 |
-| Nodes whose start line differs | 7320 |
-| Parse time, ours (total / median per file) | 954 ms / 0.45 ms |
-| Parse time, mystmd (total / median per file) | 490 ms / 0.23 ms |
+| Nodes whose start line differs | 7423 |
+| Parse time, ours (total / median per file) | 952 ms / 0.45 ms |
+| Parse time, mystmd (total / median per file) | 485 ms / 0.23 ms |
 
 `MYST_CORPUS=<folder> npm run corpus` reproduces these numbers, and does nothing if `MYST_CORPUS` isn't set.
 The corpus isn't part of this repo, so CI doesn't run it.

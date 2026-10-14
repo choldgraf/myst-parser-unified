@@ -2,7 +2,7 @@
 
 The parser is `mdast-util-from-markdown` with extensions for MyST.
 micromark splits the source into tokens, and `mdast-util-from-markdown` turns those tokens into an mdast tree.
-Each of `src/roles.ts`, `src/directives.ts`, `src/blocks.ts`, `src/citations.ts` and `src/definitionLists.ts` exports two extensions:
+Each of `src/roles.ts`, `src/directives.ts`, `src/blocks.ts`, `src/citations.ts`, `src/definitionLists.ts` and `src/math.ts` exports two extensions:
 
 - a **micromark extension**, which tells micromark how to find the syntax;
 - an **mdast extension**, which builds the same nodes that mystmd's parser builds.
@@ -78,6 +78,17 @@ A description right after another one needs no term.
 Like mystmd, a list is loose if a description has a blank line inside it or before the next description.
 In a tight list, a description's text goes straight in the `definitionDescription` node, without a paragraph.
 
+## Math
+
+[`src/math.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/math.ts) parses dollar math and amsmath environments, with the same rules as mystmd's `markdown-it-dollarmath` and `markdown-it-amsmath`:
+
+- `$x$` is an `inlineMath` node, and `$$x$$` inside a paragraph is a `math` node in the paragraph.
+- A `$$` block ends at the first line that ends with `$$`, so `$$ x $$` on one line is a block too.
+  A label after the closing `$$`, like `$$ … $$ (eq1)`, gives the node a `label`, `identifier` and `html_id`, with spaces in the label turned into `-`.
+  A `$$` block can't have a blank line in it or interrupt a paragraph.
+- `\begin{equation}` and the other top-level environments, like `align` and `pmatrix`, are a `math` node whose value keeps the `\begin` and `\end` lines.
+  They can have blank lines in them and interrupt a paragraph, and mystmd drops any text after the `\end{…}`.
+
 ## Notes on micromark
 
 - micromark's API is low level.
@@ -91,6 +102,8 @@ In a tight list, a description's text goes straight in the `definitionDescriptio
 - micromark tries a new container twice: once to check, and again after closing the paragraph before it.
   So a definition description can't read its term from the paragraph before it, which changes between the two tries.
   Instead, a construct that never matches records where each paragraph starts, and the description looks that up.
+- A token that spans lines needs a token around each line's characters and each line ending.
+  Without them, micromark loops forever when it splits the token back into lines.
 
 ## Not supported yet
 
@@ -101,5 +114,3 @@ Effort is relative to the roles, directives and blocks above.
 - Inline options, like `` {sub .class #id}`2` `` or ```` ```{note .class} ````. Small: adapt the attribute parser in `micromark-extension-directive`.
 - YAML options in a `---` block at the start of a directive. Small, but there are no exact positions for values inside YAML.
 - A colon fence without `{name}`, like `:::note`, which mystmd turns into a code block. Small.
-- Math environments like `\begin{equation}`. Small: one fence-like block construct.
-- Two dollar-math forms: `$$ x $$` on one line as display math, and `$$ … $$ (eq1)` with a label. Medium: adapt `micromark-extension-math`.
