@@ -16,6 +16,7 @@ const cases = {
   'keys in emphasis': '*@key* and _[@a]_',
   'keys in a directive body': '```{note}\n@key [p. 3]\n\n[@a; @b]\n```',
   'a group across lines': '[@a;\n@b]',
+  'keys after a closed autolink and in a broken one': '<https://x.com/@u> @k and <x\\+@y.com>',
 };
 
 test.each(Object.entries(cases))('%s parses like mystmd', (_, src) => {
@@ -29,12 +30,6 @@ const cites = (node: any): any[] => (node.type === 'cite' ? [node] : (node.child
 test.each(['a@b.com', 'https://x.com/@user', 'hackmd.com/@user'])('%s has no citation, like mystmd', (src) => {
   expect(cites(parse(src))).toEqual([]);
   expect(cites(mystmd(src))).toEqual([]);
-});
-
-// docs/differences.md covers this difference
-test('an `@` after an unclosed `<` is text here, and a citation in mystmd', () => {
-  expect(cites(parse('<x\\+@y.com>'))).toEqual([]);
-  expect(cites(mystmd('<x\\+@y.com>'))).toHaveLength(1);
 });
 
 // mystmd has no exact columns, so check positions against the source

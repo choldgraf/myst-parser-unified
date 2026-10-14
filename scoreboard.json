@@ -5,7 +5,7 @@
       "total": 90
     },
     "commonmark": {
-      "pass": 397,
+      "pass": 398,
       "total": 651
     },
     "passing": [
@@ -371,6 +371,7 @@
       "cmark_spec_0.30: Autolinks - example 600",
       "cmark_spec_0.30: Autolinks - example 603",
       "cmark_spec_0.30: Autolinks - example 604",
+      "cmark_spec_0.30: Autolinks - example 605",
       "cmark_spec_0.30: Autolinks - example 606",
       "cmark_spec_0.30: Autolinks - example 608",
       "cmark_spec_0.30: Autolinks - example 609",
@@ -479,7 +480,7 @@
       "total": 90
     },
     "commonmark": {
-      "pass": 624,
+      "pass": 625,
       "total": 651
     },
     "passing": [
@@ -1074,6 +1075,7 @@
       "cmark_spec_0.30: Autolinks - example 602",
       "cmark_spec_0.30: Autolinks - example 603",
       "cmark_spec_0.30: Autolinks - example 604",
+      "cmark_spec_0.30: Autolinks - example 605",
       "cmark_spec_0.30: Autolinks - example 606",
       "cmark_spec_0.30: Autolinks - example 608",
       "cmark_spec_0.30: Autolinks - example 609",
@@ -1198,7 +1200,7 @@
       "total": 90
     },
     "commonmark": {
-      "pass": 421,
+      "pass": 420,
       "total": 651
     },
     "passing": [
@@ -1583,7 +1585,6 @@
       "cmark_spec_0.30: Autolinks - example 601",
       "cmark_spec_0.30: Autolinks - example 603",
       "cmark_spec_0.30: Autolinks - example 604",
-      "cmark_spec_0.30: Autolinks - example 605",
       "cmark_spec_0.30: Autolinks - example 606",
       "cmark_spec_0.30: Autolinks - example 607",
       "cmark_spec_0.30: Autolinks - example 608",
@@ -1688,7 +1689,7 @@
       "total": 90
     },
     "commonmark": {
-      "pass": 624,
+      "pass": 625,
       "total": 651
     },
     "passing": [
@@ -2283,6 +2284,7 @@
       "cmark_spec_0.30: Autolinks - example 602",
       "cmark_spec_0.30: Autolinks - example 603",
       "cmark_spec_0.30: Autolinks - example 604",
+      "cmark_spec_0.30: Autolinks - example 605",
       "cmark_spec_0.30: Autolinks - example 606",
       "cmark_spec_0.30: Autolinks - example 608",
       "cmark_spec_0.30: Autolinks - example 609",

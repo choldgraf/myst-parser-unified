@@ -10,17 +10,17 @@ To measure that, we parse the MyST in each [`myst-spec`](https://github.com/jupy
 The passing examples are in [`scoreboard.json`](scoreboard.json).
 
 **Score: 65 of 90 MyST examples match.**
-The 651 CommonMark spec examples are scored separately: 397 of them match.
+The 651 CommonMark spec examples are scored separately: 398 of them match.
 
 `toMystmd(tree)` is an optional pass that turns our tree into the shape mystmd's parser builds.
-**With `toMystmd`: 83 of 90 MyST examples and 624 of 651 CommonMark examples match.**
+**With `toMystmd`: 83 of 90 MyST examples and 625 of 651 CommonMark examples match.**
 
 We also run mystmd's directives and roles on our tree, and compare the result with each spec example's expected tree.
-**After directives and roles: 57 of 90 MyST examples and 421 of 651 CommonMark examples match.**
+**After directives and roles: 57 of 90 MyST examples and 420 of 651 CommonMark examples match.**
 mystmd's own parser doesn't match all of the spec's trees either, because the spec is older than the parser.
 
 `mystParse` is a drop-in for myst-parser's `mystParse`, and we compare the two, called the same way, on each example: the trees and the messages.
-**With `mystParse`: 89 of 90 MyST examples and 624 of 651 CommonMark examples match.**
+**With `mystParse`: 89 of 90 MyST examples and 625 of 651 CommonMark examples match.**
 
 `npm run score` reproduces these numbers.
 

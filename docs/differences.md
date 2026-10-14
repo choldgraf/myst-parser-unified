@@ -97,8 +97,6 @@ A few examples fail for reasons an adapter can't fix:
 
 Citations parse like mystmd's, with these differences:
 
-- An `@` after an unclosed `<`, like `<foo\+@bar.com>`, is text here and a citation in mystmd.
-  That keeps CommonMark example 605 passing, which expects text.
 - `![@key]` with no URL is `!` and a `citeGroup` in mystmd, and `![` with a narrative `cite` here, because micromark takes `![` as one token.
 - A `citeGroup` in link text, like `[see [@key]](url)`, stops mystmd from seeing the link.
   Here it's a link, with the citation as text, like `[@key](url)`.
@@ -111,7 +109,7 @@ Like myst-parser, it adds mystmd's default directives and roles to the ones you 
 
 The `dropin` score calls both with the options `mystmd-client` uses: the directives and roles of the extensions `myst build` turns on, `linkify: true`, and a new vfile for each example.
 An example passes when the trees match after `normalize()`, and the messages match in order on their text, line, rule and whether they're an error.
-Columns aren't compared, but they also match on all 713 passing examples, including the three with messages.
+Columns aren't compared, but they also match on all 714 passing examples, including the three with messages.
 They can differ elsewhere, because markdown-it has no column data for blocks and nested parses, so mystmd puts some messages at column 1.
 For example, for a role in a `list-table` cell, mystmd says column 1 and ours says the real column.
 
