@@ -4,17 +4,16 @@ import { frontmatterFromMarkdown } from 'mdast-util-frontmatter';
 import { gfmFootnoteFromMarkdown } from 'mdast-util-gfm-footnote';
 import { gfmTableFromMarkdown } from 'mdast-util-gfm-table';
 import { gfmTaskListItemFromMarkdown } from 'mdast-util-gfm-task-list-item';
-import { mathFromMarkdown } from 'mdast-util-math';
 import { frontmatter } from 'micromark-extension-frontmatter';
 import { gfmFootnote } from 'micromark-extension-gfm-footnote';
 import { gfmTable } from 'micromark-extension-gfm-table';
 import { gfmTaskListItem } from 'micromark-extension-gfm-task-list-item';
-import { math } from 'micromark-extension-math';
 import type { Extension } from 'micromark-util-types';
 import { blocks, blocksFromMarkdown } from './blocks.ts';
 import { citation, citationFromMarkdown, type Citation } from './citations.ts';
 import { definitionList, definitionListFromMarkdown } from './definitionLists.ts';
 import { directive, directiveFromMarkdown } from './directives.ts';
+import { math, mathFromMarkdown } from './math.ts';
 import { role, roleFromMarkdown } from './roles.ts';
 
 export { toMystmd } from './mystmd.ts';
@@ -119,13 +118,25 @@ declare module 'mdast' {
     type: 'definitionDescription';
     children: (BlockContent | DefinitionContent | PhrasingContent)[];
   }
+  interface Math extends Literal {
+    type: 'math';
+    identifier?: string;
+    label?: string;
+    html_id?: string;
+  }
+  interface InlineMath extends Literal {
+    type: 'inlineMath';
+  }
   interface PhrasingContentMap {
     mystRole: MystRole;
+    inlineMath: InlineMath;
+    math: Math;
     cite: Cite;
     citeGroup: CiteGroup;
   }
   interface BlockContentMap {
     mystDirective: MystDirective;
+    math: Math;
     mystTarget: MystTarget;
     comment: Comment;
     blockBreak: BlockBreak;
@@ -133,6 +144,8 @@ declare module 'mdast' {
   }
   interface RootContentMap {
     mystRole: MystRole;
+    inlineMath: InlineMath;
+    math: Math;
     mystRoleBody: MystRoleBody;
     cite: Cite;
     citeGroup: CiteGroup;
