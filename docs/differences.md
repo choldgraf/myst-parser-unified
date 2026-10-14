@@ -101,7 +101,9 @@ Like myst-parser, it adds mystmd's default directives and roles to the ones you 
 
 The `dropin` score calls both with the options `mystmd-client` uses: the directives and roles of the extensions `myst build` turns on, `linkify: true`, and a new vfile for each example.
 An example passes when the trees match after `normalize()`, and the messages match in order on their text, line, rule and whether they're an error.
-Columns aren't compared, because mystmd's messages often have column 1 where ours have the real column, like for a role in a `list-table` cell.
+Columns aren't compared, but they also match on all 713 passing examples, including the three with messages.
+They can differ elsewhere, because markdown-it has no column data for blocks and nested parses, so mystmd puts some messages at column 1.
+For example, for a role in a `list-table` cell, mystmd says column 1 and ours says the real column.
 
 Every example that fails also fails with `toMystmd`, for the reasons above; the one MyST example is smartquotes.
 Six MyST examples that fail with `toMystmd` pass here, because the directive throws away the part that differed, like a figure's linkified argument.
