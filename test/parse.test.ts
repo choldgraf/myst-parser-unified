@@ -68,6 +68,11 @@ const syntax = [
   '```{note}\n```',
   '  ```{note}\n   X\n\n    Y\n  ```',
   '```{code} python\n# not a heading\n```',
+  // A colon fence without braces is a code block
+  ':::note\nBody\n:::',
+  'Para\n:::py\n  x\n::::',
+  '> :::py\n> x\nlazy',
+  ':::py\nunclosed',
   // Targets, comments and block breaks
   '% hi  \n%there\nPara',
   '% a\n\n% b',
@@ -91,4 +96,11 @@ test.each(syntax)('syntax matches mystmd: %j', (src) => {
 test('`+ + +` is a list here, and a block break in mystmd', () => {
   expect(parse('+ + +').children[0].type).toBe('list');
   expect(mystmd('+ + +', { nestBlocks: false }).children[0].type).toBe('blockBreak');
+});
+
+test('a colon fence without braces is a code block that spans its source', () => {
+  const src = '> :::py\n> x\n> :::';
+  const code = (parse(src).children[0] as any).children[0];
+  expect(code.position.start).toEqual({ line: 1, column: 3, offset: 2 });
+  expect(code.position.end).toEqual({ line: 3, column: 6, offset: src.length });
 });

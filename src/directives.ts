@@ -13,6 +13,7 @@ import type {
   State,
   TokenizeContext,
   Token as MicromarkToken,
+  TokenType,
 } from 'micromark-util-types';
 import { atLineEnd, current, exit, factoryHeader, nonLazyLine } from './shared.ts';
 
@@ -36,8 +37,9 @@ declare module 'micromark-util-types' {
 /** micromark extension: a fence of three or more backticks, tildes or colons, followed by `{name}` */
 export function directive(): Extension {
   const construct: Construct = { name: 'mystDirective', tokenize: tokenizeDirective, concrete: true };
-  // These run before CommonMark's fenced code, which takes over when `{name}` is missing
-  return { flow: { [codes.graveAccent]: construct, [codes.tilde]: construct, [codes.colon]: construct } };
+  // These run before CommonMark's fenced code, which takes over when `{name}` is missing.
+  // `colonCode` does the same for colons.
+  return { flow: { [codes.graveAccent]: construct, [codes.tilde]: construct, [codes.colon]: [construct, colonCode] } };
 }
 
 const option: Construct = { tokenize: tokenizeOption, partial: true };
@@ -46,11 +48,8 @@ const yamlDelimiter: Construct = { tokenize: tokenizeYamlDelimiter, partial: tru
 
 function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, nok: State): State {
   const self = this;
-  const tail = self.events[self.events.length - 1];
-  // Like in a fenced code block, lines in the body lose up to as much indent as the opening fence has
-  const initialSize =
-    tail && tail[1].type === types.linePrefix ? tail[2].sliceSerialize(tail[1], true).length : 0;
-  const closingFence: Construct = { tokenize: tokenizeClosingFence, partial: true };
+  const initialSize = fenceIndent(self);
+  let closingFence: Construct;
   const yamlOptions: Construct = { tokenize: tokenizeYamlOptions, partial: true };
   const blockLine: Construct = { tokenize: tokenizeBlockLine, partial: true };
   let marker: Code;
@@ -77,6 +76,7 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
     }
     if (sizeOpen < constants.codeFencedSequenceSizeMin) return nok(code);
     effects.exit('mystDirectiveSequence');
+    closingFence = factoryClosingFence(marker, sizeOpen, 'mystDirectiveFence', 'mystDirectiveSequence');
     return factorySpace(effects, nameOpen, types.whitespace)(code);
   }
 
@@ -251,32 +251,146 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
   function tokenizeBlockLine(effects: Effects, ok: State, nok: State): State {
     return effects.attempt(nonLazyLine, effects.check(closingFence, nok, ok), nok);
   }
+}
 
-  function tokenizeClosingFence(this: TokenizeContext, effects: Effects, ok: State, nok: State): State {
-    let size = 0;
+// A colon fence without `{name}`, like `:::note`, is a code block in mystmd, so it's a `codeFenced` here too.
+// micromark's own `codeFenced` only takes backticks and tildes, so this is a copy of it for colons.
+const colonCode: Construct = { name: 'colonCode', tokenize: tokenizeColonCode, concrete: true };
+
+function tokenizeColonCode(this: TokenizeContext, effects: Effects, ok: State, nok: State): State {
+  const self = this;
+  const initialSize = fenceIndent(self);
+  let closing: Construct;
+  let sizeOpen = 0;
+  return start;
+
+  function start(code: Code) {
+    effects.enter(types.codeFenced);
+    effects.enter(types.codeFencedFence);
+    effects.enter(types.codeFencedFenceSequence);
+    return sequence(code);
+  }
+
+  function sequence(code: Code): State | undefined {
+    if (code === codes.colon) {
+      sizeOpen++;
+      effects.consume(code);
+      return sequence;
+    }
+    if (sizeOpen < constants.codeFencedSequenceSizeMin) return nok(code);
+    effects.exit(types.codeFencedFenceSequence);
+    closing = factoryClosingFence(codes.colon, sizeOpen, types.codeFencedFence, types.codeFencedFenceSequence);
+    return factorySpace(effects, infoStart, types.whitespace)(code);
+  }
+
+  // The first word is the language, and the rest of the line its meta
+  function infoStart(code: Code) {
+    if (atLineEnd(code)) return openEnd(code);
+    effects.enter(types.codeFencedFenceInfo);
+    effects.enter(types.chunkString, { contentType: constants.contentTypeString });
+    return info(code);
+  }
+
+  function info(code: Code): State | undefined {
+    if (atLineEnd(code) || markdownSpace(code)) {
+      effects.exit(types.chunkString);
+      effects.exit(types.codeFencedFenceInfo);
+      return factorySpace(effects, metaStart, types.whitespace)(code);
+    }
+    effects.consume(code);
+    return info;
+  }
+
+  function metaStart(code: Code) {
+    if (atLineEnd(code)) return openEnd(code);
+    effects.enter(types.codeFencedFenceMeta);
+    effects.enter(types.chunkString, { contentType: constants.contentTypeString });
+    return meta(code);
+  }
+
+  function meta(code: Code): State | undefined {
+    if (atLineEnd(code)) {
+      effects.exit(types.chunkString);
+      effects.exit(types.codeFencedFenceMeta);
+      return openEnd(code);
+    }
+    effects.consume(code);
+    return meta;
+  }
+
+  function openEnd(code: Code) {
+    effects.exit(types.codeFencedFence);
+    return self.interrupt ? ok(code) : lineEnd(code);
+  }
+
+  function lineEnd(code: Code): State | undefined {
+    return effects.attempt(nonLazyLine, lineStart, after)(code);
+  }
+
+  function lineStart(code: Code) {
+    return effects.attempt(closing, after, contentStart)(code);
+  }
+
+  function contentStart(code: Code) {
+    return initialSize ? factorySpace(effects, content, types.linePrefix, initialSize + 1)(code) : content(code);
+  }
+
+  function content(code: Code) {
+    if (atLineEnd(code)) return lineEnd(code);
+    effects.enter(types.codeFlowValue);
+    return value(code);
+  }
+
+  function value(code: Code): State | undefined {
+    if (atLineEnd(code)) {
+      effects.exit(types.codeFlowValue);
+      return lineEnd(code);
+    }
+    effects.consume(code);
+    return value;
+  }
+
+  function after(code: Code) {
+    effects.exit(types.codeFenced);
+    return ok(code);
+  }
+}
+
+/** Like in a fenced code block, lines lose up to as much indent as the opening fence has */
+function fenceIndent(self: TokenizeContext) {
+  const tail = self.events[self.events.length - 1];
+  return tail && tail[1].type === types.linePrefix ? tail[2].sliceSerialize(tail[1], true).length : 0;
+}
+
+/** A closing fence of at least `size` `marker`s and then only whitespace, as `fenceType` and `sequenceType` tokens */
+function factoryClosingFence(marker: Code, size: number, fenceType: TokenType, sequenceType: TokenType): Construct {
+  return { tokenize, partial: true };
+
+  function tokenize(this: TokenizeContext, effects: Effects, ok: State, nok: State): State {
+    let count = 0;
     const indentMax = this.parser.constructs.disable.null?.includes('codeIndented') ? undefined : constants.tabSize;
-    return factorySpace(effects, closeStart, types.linePrefix, indentMax);
+    return factorySpace(effects, start, types.linePrefix, indentMax);
 
-    function closeStart(code: Code) {
-      effects.enter('mystDirectiveFence');
-      effects.enter('mystDirectiveSequence');
+    function start(code: Code) {
+      effects.enter(fenceType);
+      effects.enter(sequenceType);
       return sequence(code);
     }
 
     function sequence(code: Code): State | undefined {
       if (code === marker) {
-        size++;
+        count++;
         effects.consume(code);
         return sequence;
       }
-      if (size < sizeOpen) return nok(code);
-      effects.exit('mystDirectiveSequence');
-      return factorySpace(effects, closeEnd, types.whitespace)(code);
+      if (count < size) return nok(code);
+      effects.exit(sequenceType);
+      return factorySpace(effects, end, types.whitespace)(code);
     }
 
-    function closeEnd(code: Code) {
+    function end(code: Code) {
       if (!atLineEnd(code)) return nok(code);
-      effects.exit('mystDirectiveFence');
+      effects.exit(fenceType);
       return ok(code);
     }
   }
