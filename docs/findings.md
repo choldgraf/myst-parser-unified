@@ -7,7 +7,8 @@ It says what this parser found, what an adapter from its tree to mystmd's covers
 
 Editors, language servers and source maps need the line and column of every node.
 mystmd's markdown-it parser records line numbers for blocks, but no columns inside a line ([mystmd#2864](https://github.com/jupyter-book/mystmd/issues/2864)).
-[mystmd-lsp's design doc](https://github.com/choldgraf/mystmd-lsp/blob/main/docs/design.md) lists where that leaves positions missing or wrong, like on roles and on the nodes directive transforms create.
+[mystmd-lsp's design doc](https://github.com/choldgraf/mystmd-lsp/blob/main/docs/design.md) lists where that leaves positions missing or wrong, like on roles.
+Directive transforms also drop `position` on the figure and table containers they create ([myst-author upstream asks](https://github.com/choldgraf/myst-author/blob/main/upstream/README.md#data-and-packaging-gaps-candidates-for-small-fixes)).
 
 Tools work around this.
 mystmd-client's `parseMyst`, which [mystmd-lsp](https://github.com/choldgraf/mystmd-lsp) calls, copies a directive's position onto its children before transforms run.
@@ -62,7 +63,7 @@ Two are left:
 - Smartquotes need the source, to see which quotes were escaped, and a port of markdown-it's `smartquotes` rule.
 - Linkify needs markdown-it's `linkify-it`.
 
-The same page lists two differences that no adapter can fix.
+The same page lists [two other differences that no adapter can fix](differences.md#what-an-adapter-would-need-to-do): how CommonMark 0.30 and 0.31.2 end HTML comments, and the last line ending of an HTML block, which markdown-it drops.
 
 ## What blocks a switch in mystmd
 
@@ -94,7 +95,7 @@ Speed enough to parse every project page
 - A unified-native parser for mystmd ([mystmd#1705](https://github.com/jupyter-book/mystmd/issues/1705)).
 - myst-spec as a conformance suite that other parsers reuse ([mystmd#3078](https://github.com/jupyter-book/mystmd/issues/3078)).
 - An mdast adapter in mystmd, myst-author's proposal U10 ([myst-author upstream asks](https://github.com/choldgraf/myst-author/blob/main/upstream/README.md)).
-- myst-parser exporting `applyDirectives` and `applyRoles`, or accepting a custom tokenizer, so `mystParse` doesn't need an exact pin ([mystmd#1705](https://github.com/jupyter-book/mystmd/issues/1705)).
+- myst-parser exporting `applyDirectives` and `applyRoles`, or accepting a custom tokenizer, so `mystParse` doesn't need an exact pin (not filed yet, related to [mystmd#1705](https://github.com/jupyter-book/mystmd/issues/1705)).
 
 ## Where it could go next
 
