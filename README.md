@@ -111,8 +111,8 @@ Nothing checks these, so change both sides together:
 - The math rules in `src/math.ts`, from `markdown-it-dollarmath`, `markdown-it-amsmath` and `myst-common`'s `normalizeLabel`.
 - The characters inside braces in `src/shared.ts`, from `markdown-it-myst/dist/inlineAttributes.js`.
 - The options and `myst-ext-*` extensions in `test/spec.ts` and `package.json`, from mystmd-client's `parse.ts`.
-- The scorer names in `test/spec.ts` and `scripts/score.ts`, and the columns in `docs/index.md` and `scoreboard.json`.
+- The scorer names in `test/spec.ts` and the `labels` in `scripts/score.ts`, and the columns in `docs/index.md` and `scoreboard.json`.
 - The numbers in this README, `docs/differences.md` and `docs/findings.md`, from `npm run score` and `npm run corpus`; CI checks only `scoreboard.json`.
-- The `myst-parser` 1.7.4 pin in `package.json` (peer and dev), in this README, and the `dist/` paths in `src/mystParse.ts`.
+- The `myst-parser` 1.7.4 pin in `package.json` (peer and dev), in this README, and the files `src/mystParse.ts` and `test/mystParse.test.ts` require from myst-parser's folder.
 - The mdast node types in `src/parse.ts`, and the nodes each `*FromMarkdown` builds.
 - The syntax list in `docs/how-it-works.md`, and the `syntaxes` array in `src/parse.ts`.
