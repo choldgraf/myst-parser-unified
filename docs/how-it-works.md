@@ -1,5 +1,61 @@
 # How it works
 
+`parse()` turns a MyST string into an mdast tree, and `mystParse()` turns it into the tree myst-parser's `mystParse` returns.
+Every position comes from micromark: each token records where it starts and ends, and `mdast-util-from-markdown` copies that onto the node it builds.
+
+```{mermaid}
+flowchart LR
+  src["Markdown string"] --> syntax["micromark, with the micromark extension from each syntax module"]
+  syntax -->|tokens| from["mdast-util-from-markdown, with each module's mdast extension"]
+  from --> raw["raw tree, from parse() in src/parse.ts"]
+  raw --> adapt["toMystmd() in src/mystmd.ts"]
+  adapt --> adapted["adapted tree"]
+  adapted --> apply["applyDirectives and applyRoles from myst-parser"]
+  apply --> out["mystParse() output, from src/mystParse.ts"]
+  ref["mystmd's parser and myst-spec's expected trees"] -.-> score["scorers in test/spec.ts, run by scripts/score.ts"]
+  raw -.-> score
+  adapted -.-> score
+  out -.-> score
+```
+
+`mystParse()` is `toMystmd(parse(src))` followed by `applyDirectives` and `applyRoles`.
+When a directive parses its body, that body goes back through `mystParse()`, with its line numbers shifted to where it sits in the file.
+
+## A worked example
+
+```markdown
+(water)=
+- H{sub}`2`O
+```
+
+`parse()` builds a `mystTarget` node and a list whose paragraph holds a `mystRole` node, with `processed: false` and a `mystRoleBody` child.
+Positions come from micromark's tokens, so the role starts at line 2, column 4, and the `2` inside it at column 10.
+`toMystmd()` sets the list item's `spread` to `true`, like mystmd.
+On other input it renames nodes, like `blockBreak` to `block`, and reshapes them, like turning link references into links.
+`applyRoles` runs the `sub` role, which swaps the `mystRoleBody` for a `subscript` node and drops `processed: false`.
+`applyDirectives` has nothing to do here, and the target is left for mystmd's later transforms.
+
+## How scoring works
+
+`npm run score` runs `scripts/score.ts`, which runs every scorer in `test/spec.ts` on each myst-spec example that has MyST source.
+`raw` and `adapted` compare `parse()` and `toMystmd(parse())` with mystmd's parser, and `dropin` compares our `mystParse` with myst-parser's.
+`transformed` runs mystmd's directives and roles on `parse()`, and `ceiling` runs myst-parser's `mystParse`, and both compare with the spec's expected tree.
+It writes each scorer's passing examples to `scoreboard.json`, and the data for the [score table](index.md#score-per-file) to `docs/data/`.
+`test/scoreboard.test.ts` fails if any example listed in `scoreboard.json` stops passing.
+CI runs `npm test`, `npm run typecheck`, `npm run build` and `npm run score`, and fails if `scoreboard.json` then differs from the committed file.
+
+## To add a syntax
+
+1. Write `src/<name>.ts`, exporting a micromark extension that tokenizes the syntax and an mdast extension that builds the nodes mystmd builds.
+2. Add the pair to the `syntaxes` array in `src/parse.ts`, and declare any new node types in its `declare module 'mdast'` block.
+3. Write `test/<name>.test.ts`, which compares `parse()` with mystmd's live parse from `mystmd()` in `test/spec.ts`, like `test/citations.test.ts` does.
+4. If the tree can't match mystmd's, say why in [Differences from mystmd](differences.md).
+5. Run `npm run score`, and commit the updated `scoreboard.json`.
+
+Then check [What must stay in sync by hand](index.md#what-must-stay-in-sync-by-hand) for anything else the syntax touches.
+
+## The modules
+
 The parser is `mdast-util-from-markdown` with extensions for MyST.
 micromark splits the source into tokens, and `mdast-util-from-markdown` turns those tokens into an mdast tree.
 Each of `src/roles.ts`, `src/directives.ts`, `src/blocks.ts`, `src/citations.ts`, `src/definitionLists.ts` and `src/math.ts` exports two extensions:
