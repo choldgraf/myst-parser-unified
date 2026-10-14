@@ -25,7 +25,7 @@ In the drop-in comparison, for a role in a `list-table` cell, mystmd puts the me
 
 ## Measured results
 
-`npm run score` scores the myst-spec examples four ways:
+`npm run score` scores the myst-spec examples five ways:
 
 | Score | MyST (of 90) | CommonMark (of 651) |
 | --- | --- | --- |
@@ -33,12 +33,11 @@ In the drop-in comparison, for a role in a `list-table` cell, mystmd puts the me
 | With `toMystmd`, against mystmd's tree | 83 | 625 |
 | After mystmd's directives and roles, against the spec's `mdast` | 57 | 420 |
 | Drop-in `mystParse`, against myst-parser's `mystParse` | 89 | 625 |
+| myst-parser's own `mystParse`, against the spec's `mdast` | 53 | 558 |
 
-The third score has a ceiling.
-mystmd's own `mystParse` against the spec's `mdast` scores 53 of 90 MyST and 558 of 651 CommonMark examples, because the spec is older than the parser.
-It fails 37 MyST examples: figures, tables, block breaks, comments, and options typed as numbers.
-30 of this parser's 33 MyST misses are among them.
-`npm run score` doesn't print the ceiling; we measured it by running mystmd's `mystParse` through the same comparison.
+The last row is a ceiling for the third, because the spec is older than mystmd's parser.
+myst-parser fails 37 MyST examples: figures, tables, block breaks, comments, and options typed as numbers.
+30 of this parser's 33 MyST misses after directives and roles are among them, which comes from comparing the `transformed` and `ceiling` lists in `scoreboard.json`.
 
 `MYST_CORPUS=<folder> npm run corpus` compares both parsers on 599 `.md` files from real projects:
 

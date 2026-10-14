@@ -95,10 +95,18 @@ export function compareDropin({ src }: { src: string }) {
   return { ours, reference, match: isDeepStrictEqual(ours, reference) };
 }
 
-/** The scores: our tree, raw and after `toMystmd`, against mystmd's; after directives and roles, against the spec's; and our `mystParse` against mystmd's */
+/** myst-parser's own `mystParse` against the spec's expected tree, which is older than the parser */
+export function compareCeiling({ src, mdast }: Case) {
+  const ours = normalize(mystmdParse(src, { ...extensions, vfile: new VFile() as any }) as Root);
+  const reference = normalize(mdast);
+  return { ours, reference, match: isDeepStrictEqual(ours, reference) };
+}
+
+/** The scores; docs/index.md says what each one compares */
 export const scorers = {
   raw: (c: Case) => compare(c),
   adapted: (c: Case) => compare(c, toMystmd),
   transformed: compareTransformed,
   dropin: compareDropin,
+  ceiling: compareCeiling,
 };
