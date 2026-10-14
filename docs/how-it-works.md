@@ -38,7 +38,7 @@ A directive with only options, like `{.dropdown}`, is a `div`.
 `factoryHeader` in [`src/shared.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/shared.ts) parses the braces for both, and [Differences from mystmd](differences.md#inline-options) says where it differs.
 
 The fence can use backticks, tildes or colons, and works like a fenced code block.
-A backtick or tilde fence without `{name}` is a normal code block.
+A fence without `{name}` is a code block, and like in mystmd that includes a colon fence like `:::note`.
 Option lines like `:class: tip` come right after the opening fence.
 Or the first body line can be `---`, followed by `class: tip` lines and another `---`, which is a YAML block of options.
 We read only flat `key: value` lines in that block; [Differences from mystmd](differences.md#yaml-options) says why.
@@ -112,10 +112,3 @@ In a tight list, a description's text goes straight in the `definitionDescriptio
   Instead, a construct that never matches records where each paragraph starts, and the description looks that up.
 - A token that spans lines needs a token around each line's characters and each line ending.
   Without them, micromark loops forever when it splits the token back into lines.
-
-## Not supported yet
-
-mystmd's parser accepts these, but no myst-spec example uses them, so the score doesn't count them.
-Effort is relative to the roles, directives and blocks above.
-
-- A colon fence without `{name}`, like `:::note`, which mystmd turns into a code block. Small.

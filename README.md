@@ -52,7 +52,6 @@ The docs cover:
 
 - [How the parser works](docs/how-it-works.md): one micromark extension per MyST syntax.
 - [Why examples fail](docs/differences.md): what `toMystmd` changes, and what it can't.
-- [What isn't supported yet](docs/how-it-works.md#not-supported-yet), with an effort estimate for each.
 - [What was hard about micromark](docs/how-it-works.md#notes-on-micromark).
 
 ## Use it
