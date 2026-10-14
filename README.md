@@ -101,3 +101,18 @@ You need Node 24 or later, which runs the TypeScript files directly.
 - `npm run build`: write JavaScript and type declarations to `dist/`.
 - `npm run docs`: score, then build the [docs site](https://chrisholdgraf.com/myst-parser-unified/).
 - `npm run docs:live`: score, then serve the site locally.
+
+## What must stay in sync by hand
+
+Nothing checks these, so change both sides together:
+
+- The citation regexes in `src/citations.ts`, copied from `markdown-it-myst/dist/citations.js`.
+- The label characters in `src/blocks.ts`, from mystmd's `TARGET_PATTERN`.
+- The math rules in `src/math.ts`, from `markdown-it-dollarmath`, `markdown-it-amsmath` and `myst-common`'s `normalizeLabel`.
+- The characters inside braces in `src/shared.ts`, from `markdown-it-myst/dist/inlineAttributes.js`.
+- The options and `myst-ext-*` extensions in `test/spec.ts` and `package.json`, from mystmd-client's `parse.ts`.
+- The scorer names in `test/spec.ts` and `scripts/score.ts`, and the columns in `docs/index.md` and `scoreboard.json`.
+- The numbers in this README, `docs/differences.md` and `docs/findings.md`, from `npm run score` and `npm run corpus`; CI checks only `scoreboard.json`.
+- The `myst-parser` 1.7.4 pin in `package.json` (peer and dev), in this README, and the `dist/` paths in `src/mystParse.ts`.
+- The mdast node types in `src/parse.ts`, and the nodes each `*FromMarkdown` builds.
+- The syntax list in `docs/how-it-works.md`, and the `syntaxes` array in `src/parse.ts`.
