@@ -3,7 +3,21 @@ import type { CompileContext, Token } from 'mdast-util-from-markdown';
 import { factorySpace } from 'micromark-factory-space';
 import { asciiDigit, markdownLineEnding, markdownSpace } from 'micromark-util-character';
 import { codes, constants, types } from 'micromark-util-symbol';
-import type { Code, Construct, Effects, State, Token as MicromarkToken, TokenizeContext, TokenType } from 'micromark-util-types';
+import type { Code, Construct, Effects, State, TokenizeContext, TokenType } from 'micromark-util-types';
+
+// Options, from `factoryHeader` here and from directives' option lines
+declare module 'micromark-util-types' {
+  interface TokenTypeMap {
+    mystOption: 'mystOption';
+    mystOptionMarker: 'mystOptionMarker';
+    mystOptionName: 'mystOptionName';
+    mystOptionValue: 'mystOptionValue';
+  }
+  interface Token {
+    /** Where a `mystOption` is: in the braces, on a `:key:` line, or in a YAML block */
+    _location?: 'inline' | 'colon' | 'yaml';
+  }
+}
 
 /** A test for characters that match `re`, skipping micromark's negative codes for tabs and line endings */
 export const charClass = (re: RegExp) => (code: Code) => code !== null && code > 0 && re.test(String.fromCharCode(code));
@@ -78,7 +92,7 @@ export function factoryHeader(
     return start;
 
     function start(code: Code) {
-      effects.enter('mystOption', { _location: 'inline' } as Partial<MicromarkToken>);
+      effects.enter('mystOption', { _location: 'inline' });
       if (code === codes.numberSign) {
         // mystmd allows one id
         if (ids) return nok(code);

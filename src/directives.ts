@@ -26,11 +26,11 @@ declare module 'micromark-util-types' {
     mystDirectiveName: 'mystDirectiveName';
     mystDirectiveArg: 'mystDirectiveArg';
     mystDirectiveBody: 'mystDirectiveBody';
-    mystOption: 'mystOption';
-    mystOptionMarker: 'mystOptionMarker';
-    mystOptionName: 'mystOptionName';
-    mystOptionValue: 'mystOptionValue';
     mystOptionsDelimiter: 'mystOptionsDelimiter';
+  }
+  interface Token {
+    /** The indent of a directive's fence, which its body's lines lose */
+    _indent?: number;
   }
 }
 
@@ -149,7 +149,7 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
     if (!inBody) {
       inBody = true;
       // The mdast handler needs this to remove the indent from `value`
-      effects.enter('mystDirectiveBody', { _indent: initialSize } as Partial<MicromarkToken>);
+      effects.enter('mystDirectiveBody', { _indent: initialSize });
     }
     return chunkStart(code);
   }
@@ -402,7 +402,7 @@ function tokenizeOption(effects: Effects, ok: State, nok: State, yaml = false): 
   return start;
 
   function start(code: Code) {
-    effects.enter('mystOption', { _location: yaml ? 'yaml' : 'colon' } as Partial<MicromarkToken>);
+    effects.enter('mystOption', { _location: yaml ? 'yaml' : 'colon' });
     if (yaml) return nameStart(code);
     effects.enter('mystOptionMarker');
     effects.consume(code); // `:`
@@ -506,7 +506,7 @@ export function directiveFromMarkdown(): FromMarkdownExtension {
         // An inline `.class` or `#id` has no name token
         const first = this.sliceSerialize(token)[0];
         const name = first === '.' ? 'class' : first === '#' ? 'id' : '';
-        this.enter({ type: 'mystOption', name, location: (token as any)._location, value: true, children: [] }, token);
+        this.enter({ type: 'mystOption', name, location: token._location!, value: true, children: [] }, token);
       },
       mystOptionName(token) {
         current(this).name = this.sliceSerialize(token);
@@ -522,7 +522,7 @@ export function directiveFromMarkdown(): FromMarkdownExtension {
       mystDirectiveBody(token) {
         // Like mystmd, remove the fence's indent, then blank lines at the start and whitespace at the end
         // (the first line's indent is already outside the body)
-        const indent = new RegExp(`\n {0,${(token as any)._indent}}`, 'g');
+        const indent = new RegExp(`\n {0,${token._indent}}`, 'g');
         const value = this.sliceSerialize(token).replace(indent, '\n').replace(/^([ \t]*\r?\n)+/, '').trimEnd();
         current(this).value = value;
         this.enter({ type: 'mystDirectiveBody', value, children: [] }, token);
