@@ -85,7 +85,8 @@ function inUrl(self: TokenizeContext) {
   if (self.previous === codes.eof || markdownLineEndingOrSpace(self.previous)) return false;
   const text = self.sliceSerialize({ start: self.events[0][1].start, end: self.now() });
   const word = /\S+$/.exec(text)![0];
-  // An unclosed `<` starts an autolink or a tag, like `<foo\+@bar.com>`; mystmd makes a citation there
+  // An unclosed `<` starts an autolink or a tag, like `<foo\+@bar.com>`, so we keep it as text like CommonMark.
+  // mystmd makes a citation there, which docs/differences.md covers.
   if (word.startsWith('<')) return !word.includes('>');
   return word.includes('://') || word.startsWith('www.') || /^([a-z0-9-]+\.)+[a-z]{2,}(\/|$)/i.test(word);
 }
