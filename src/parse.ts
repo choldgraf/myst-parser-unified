@@ -12,6 +12,7 @@ import { gfmTaskListItem } from 'micromark-extension-gfm-task-list-item';
 import { math } from 'micromark-extension-math';
 import type { Extension } from 'micromark-util-types';
 import { blocks, blocksFromMarkdown } from './blocks.ts';
+import { citation, citationFromMarkdown, type Citation } from './citations.ts';
 import { directive, directiveFromMarkdown } from './directives.ts';
 import { role, roleFromMarkdown } from './roles.ts';
 
@@ -25,6 +26,7 @@ const syntaxes: [Extension, FromMarkdownExtension][] = [
   [gfmTaskListItem(), gfmTaskListItemFromMarkdown()],
   [math(), mathFromMarkdown()],
   [role(), roleFromMarkdown()],
+  [citation(), citationFromMarkdown()],
   [directive(), directiveFromMarkdown()],
   [blocks(), blocksFromMarkdown()],
 ];
@@ -84,6 +86,14 @@ declare module 'mdast' {
     value: string;
     children: (BlockContent | DefinitionContent)[];
   }
+  interface Cite extends Node, Citation {
+    type: 'cite';
+  }
+  interface CiteGroup extends Parent {
+    type: 'citeGroup';
+    kind: 'parenthetical';
+    children: Cite[];
+  }
   interface MystTarget extends Node {
     type: 'mystTarget';
     label: string;
@@ -97,6 +107,8 @@ declare module 'mdast' {
   }
   interface PhrasingContentMap {
     mystRole: MystRole;
+    cite: Cite;
+    citeGroup: CiteGroup;
   }
   interface BlockContentMap {
     mystDirective: MystDirective;
@@ -107,6 +119,8 @@ declare module 'mdast' {
   interface RootContentMap {
     mystRole: MystRole;
     mystRoleBody: MystRoleBody;
+    cite: Cite;
+    citeGroup: CiteGroup;
     mystDirective: MystDirective;
     mystDirectiveArg: MystDirectiveArg;
     mystOption: MystOption;
