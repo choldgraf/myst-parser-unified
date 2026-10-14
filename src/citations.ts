@@ -5,7 +5,7 @@ import type { Extension as FromMarkdownExtension } from 'mdast-util-from-markdow
 import { markdownLineEnding, markdownLineEndingOrSpace } from 'micromark-util-character';
 import { codes, types } from 'micromark-util-symbol';
 import type { Code, Construct, Effects, Event, Extension, State, TokenizeContext } from 'micromark-util-types';
-import { charClass, exit } from './shared.ts';
+import { charClass, dataConsumer, exit } from './shared.ts';
 
 declare module 'micromark-util-types' {
   interface TokenTypeMap {
@@ -54,28 +54,15 @@ function cite(kind: Citation['kind'], label: string, rest: Partial<Citation>): C
 /** One character per code, so that a match's length is the number of codes to consume */
 const char = (code: Code) => (code! < codes.nul ? (markdownLineEnding(code) ? '\n' : ' ') : String.fromCharCode(code!));
 
-/**
- * Consume `size` codes, then go to `next`.
- * Each line is a `citeData` token and each line ending its own token, which micromark needs to split the lines up again.
- */
+/** Consume `size` codes as `citeData`, then go to `next` */
 function factoryCount(effects: Effects, size: number, next: State): State {
-  let open = false;
+  const data = dataConsumer(effects, 'citeData');
   return count;
 
   function count(code: Code): State | undefined {
-    if (markdownLineEnding(code)) {
-      if (open) effects.exit('citeData');
-      open = false;
-      effects.enter(types.lineEnding);
-      effects.consume(code);
-      effects.exit(types.lineEnding);
-    } else {
-      if (!open) effects.enter('citeData');
-      open = true;
-      effects.consume(code);
-    }
+    data.consume(code);
     if (--size) return count;
-    if (open) effects.exit('citeData');
+    data.close();
     return next;
   }
 }

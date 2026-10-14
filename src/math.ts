@@ -5,10 +5,9 @@
 // - `\begin{equation}` and the other top-level environments end at the matching `\end{…}`, wherever it is.
 // Like mystmd, the blocks run on through lazy lines, and a container like a list can't start inside them.
 import type { Extension as FromMarkdownExtension } from 'mdast-util-from-markdown';
-import { markdownLineEnding } from 'micromark-util-character';
-import { codes, types } from 'micromark-util-symbol';
+import { codes } from 'micromark-util-symbol';
 import type { Code, Effects, Extension, State, TokenizeContext } from 'micromark-util-types';
-import { atLineEnd, charClass, current, exit } from './shared.ts';
+import { atLineEnd, charClass, current, dataConsumer, exit } from './shared.ts';
 
 declare module 'micromark-util-types' {
   interface TokenTypeMap {
@@ -31,34 +30,9 @@ export function math(): Extension {
   };
 }
 
-/**
- * Consume codes with each line's characters in a `mathData` token and each line ending in its own,
- * which micromark needs to split the lines up again; `close` exits the last line's token.
- */
-function dataConsumer(effects: Effects) {
-  let open = false;
-  const close = () => {
-    if (open) effects.exit('mathData');
-    open = false;
-  };
-  const consume = (code: Code) => {
-    if (markdownLineEnding(code)) {
-      close();
-      effects.enter(types.lineEnding);
-      effects.consume(code);
-      effects.exit(types.lineEnding);
-    } else {
-      if (!open) effects.enter('mathData');
-      open = true;
-      effects.consume(code);
-    }
-  };
-  return { consume, close };
-}
-
 // `$x$` or `$$x$$`, which can run over lines in the same paragraph
 function tokenizeInline(effects: Effects, ok: State, nok: State): State {
-  const data = dataConsumer(effects);
+  const data = dataConsumer(effects, 'mathData');
   let double = false;
   let empty = true;
   let backslashes = 0;
@@ -119,7 +93,7 @@ function closing(line: string): { end: number; label?: string } | undefined {
 // `$$` up to a line that closes it; the first line closes it only if it has more than `$$` and one character
 function tokenizeBlock(this: TokenizeContext, effects: Effects, ok: State, nok: State): State {
   const self = this;
-  const data = dataConsumer(effects);
+  const data = dataConsumer(effects, 'mathData');
   let line = '';
   let first = true;
   return start;
@@ -164,7 +138,7 @@ const environments = /^(equation|multline|gather|align|alignat|flalign|[pbBvV]?m
 
 // `\begin{name}` up to the first `\end{name}`, then the rest of that line, which mystmd drops
 function tokenizeEnvironment(effects: Effects, ok: State, nok: State): State {
-  const data = dataConsumer(effects);
+  const data = dataConsumer(effects, 'mathData');
   const begin = '\\begin{';
   let name = '';
   let end = '';

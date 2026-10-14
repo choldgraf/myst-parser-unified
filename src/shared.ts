@@ -178,6 +178,31 @@ export function factoryHeader(
 
 export const atLineEnd = (code: Code) => code === codes.eof || markdownLineEnding(code);
 
+/**
+ * Consume codes with each line's characters in a `type` token and each line ending in its own,
+ * which micromark needs to split the lines up again; `close` exits the last line's token.
+ */
+export function dataConsumer(effects: Effects, type: TokenType) {
+  let open = false;
+  const close = () => {
+    if (open) effects.exit(type);
+    open = false;
+  };
+  const consume = (code: Code) => {
+    if (markdownLineEnding(code)) {
+      close();
+      effects.enter(types.lineEnding);
+      effects.consume(code);
+      effects.exit(types.lineEnding);
+    } else {
+      if (!open) effects.enter(type);
+      open = true;
+      effects.consume(code);
+    }
+  };
+  return { consume, close };
+}
+
 /** A line ending (not the end of the file), followed by a line that isn't a lazy continuation of a paragraph */
 export const nonLazyLine: Construct = { tokenize: tokenizeNonLazyLine, partial: true };
 
