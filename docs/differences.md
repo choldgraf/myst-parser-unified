@@ -144,6 +144,22 @@ Two differences come from how mystmd handles the body:
 - After a YAML block, mystmd drops every other `---` line from the body.
   Here they stay in the body.
 
+## Inline options
+
+Inline options, like ```` ```{note .a #b key=value} ````, parse like mystmd's, with these differences:
+
+- mystmd parses the value of a directive's `key=value` twice, so the option's text is doubled, like `valuevalue`.
+  Its `value` and the directive's `options` are right, and a role's option text isn't doubled.
+  Here the text is there once.
+- mystmd builds a `mystDirectiveError` or `mystRoleError` for these, and here they stay a code block or text:
+  - `{ }`;
+  - a second name, like `{note a b}`;
+  - a word mystmd doesn't know, like `.a.b` or `k='v'`;
+  - a second `#id`, or an id that starts with a digit;
+  - a role without a name, like `` {.a}`x` ``.
+- `key=""` is an empty `key` option with no `mystOption` node in mystmd, and here the braces aren't a directive or role.
+- A quoted value can't have backticks here, even in a colon fence or a role, where mystmd allows them.
+
 ## `mystParse`
 
 `mystParse(src, { directives, roles, vfile, markdownit })` in [`src/mystParse.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/mystParse.ts) is a drop-in for myst-parser's `mystParse`.

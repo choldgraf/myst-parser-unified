@@ -14,6 +14,7 @@ Every node gets an exact line, column and offset, including in nested content, s
 
 [`src/roles.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/roles.ts) parses roles like `` {sub}`2` ``.
 A role is `{name}` followed by a body in backticks.
+Spaces inside the braces are fine, like `` { sub }`2` ``.
 Like inline code, the body ends at a run of exactly as many backticks as it started with.
 
 The body is parsed as inline markdown where it sits in the document, so `` {sub}`*2*` `` has an `emphasis` node inside it.
@@ -30,6 +31,11 @@ mystmd parses the body again as a separate string, so positions inside it count 
 The body.
 ```
 ````
+
+The braces of a directive or a role can have spaces inside, and inline options after the name, like ```` ```{note .dropdown #my-label open=true} ````.
+Like in mystmd, each inline option is a `mystOption` node with `location: "inline"`, and `#my-label` is the `label` option.
+A directive with only options, like `{.dropdown}`, is a `div`.
+`factoryHeader` in [`src/shared.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/shared.ts) parses the braces for both, and [Differences from mystmd](differences.md#inline-options) says where it differs.
 
 The fence can use backticks, tildes or colons, and works like a fenced code block.
 A backtick or tilde fence without `{name}` is a normal code block.
@@ -112,6 +118,4 @@ In a tight list, a description's text goes straight in the `definitionDescriptio
 mystmd's parser accepts these, but no myst-spec example uses them, so the score doesn't count them.
 Effort is relative to the roles, directives and blocks above.
 
-- Spaces inside a role's braces, like `` { sub }`x` ``. Small.
-- Inline options, like `` {sub .class #id}`2` `` or ```` ```{note .class} ````. Small: adapt the attribute parser in `micromark-extension-directive`.
 - A colon fence without `{name}`, like `:::note`, which mystmd turns into a code block. Small.
