@@ -6,15 +6,8 @@ It says what this parser found, what an adapter from its tree to mystmd's covers
 ## Why exact positions matter
 
 Editors, language servers and source maps need the line and column of every node.
-mystmd's markdown-it parser doesn't give them ([mystmd#2864](https://github.com/jupyter-book/mystmd/issues/2864)).
-This is what we measured:
-
-- markdown-it records line numbers for blocks, but no columns inside a line.
-- In mystmd's parse of one sample, roles had no position after transforms, and before transforms their columns ran past the end of the line.
-- In the same sample, a `[](#x)` link got a placeholder position, line 4 from column 1 to column 1.
-- `<#x>` wasn't parsed as a reference, and `@key` was reported one line early.
-- Directive transforms drop `position` on the nodes they create, like figure and table containers.
-  Built page JSON has the same gap.
+mystmd's markdown-it parser records line numbers for blocks, but no columns inside a line ([mystmd#2864](https://github.com/jupyter-book/mystmd/issues/2864)).
+[mystmd-lsp's design doc](https://github.com/choldgraf/mystmd-lsp/blob/main/docs/design.md) lists where that leaves positions missing or wrong, like on roles and on the nodes directive transforms create.
 
 Tools work around this.
 mystmd-client's `parseMyst`, which [mystmd-lsp](https://github.com/choldgraf/mystmd-lsp) calls, copies a directive's position onto its children before transforms run.
@@ -59,22 +52,13 @@ Start lines disagree because markdown-it gives inline nodes on later lines of a 
 Two are left:
 
 - Smartquotes need the source, to see which quotes were escaped, and a port of markdown-it's `smartquotes` rule.
-  With smartquotes off in mystmd's parser, 19 more spec examples and 176 more corpus files match with `toMystmd`.
 - Linkify needs markdown-it's `linkify-it`.
 
-No adapter can fix these two:
-
-- micromark follows CommonMark 0.31.2 and markdown-it follows 0.30, which end HTML comments differently.
-- markdown-it drops the last line ending of an HTML block at the end of a file.
-
-The comparison itself had a bug.
-One directive in a document turns on markdown-it's `--` replacements for every later parse with the same tokenizer, because `markdown-it-myst/dist/nestedParse.js` re-enables core rules.
-`myst build` makes a tokenizer per file, so it never sees this.
-[`test/spec.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/spec.ts) now turns replacements off after each parse, which moved the raw baseline by two MyST examples.
+The same page lists two differences that no adapter can fix.
 
 ## What blocks a switch in mystmd
 
-mystmd-lsp's design doc (`docs/design.md`, "Replacing the reference regexes") lists four requirements for a parser that replaces its reference regexes.
+[mystmd-lsp's design doc](https://github.com/choldgraf/mystmd-lsp/blob/main/docs/design.md) ("Replacing the reference regexes") lists four requirements for a parser that replaces its reference regexes.
 
 Pre-transform myst-spec mdast, so myst-transforms still run
 : Partly met.
@@ -93,8 +77,7 @@ Tolerance of half-typed input
   No corpus file threw.
 
 Speed enough to parse every project page
-: Met.
-  The corpus takes 947 ms for 599 files against mystmd's 474 ms, with a median of 0.44 ms per file.
+: Met; see the corpus table above.
 
 Two changes upstream would help:
 
