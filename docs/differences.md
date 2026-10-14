@@ -25,11 +25,12 @@ A directive's nested parse turns on markdown-it's replacements, like `--` to `â€
 
 [`test/parse.test.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/parse.test.ts) compares MyST syntax edge cases with mystmd in the same way.
 
-A second score runs mystmd's `applyDirectives` and `applyRoles` on our tree, and compares it with the spec's expected tree, with the same `normalize()`.
+That comparison is the `raw` score.
+The `adapted` score runs `toMystmd` on our tree first, then compares it the same way.
+The `transformed` score runs mystmd's `applyDirectives` and `applyRoles` on our tree, and compares it with the spec's expected tree, with the same `normalize()`.
 Some of the spec's trees are older than mystmd's parser, so mystmd's own `mystParse` doesn't match them either.
-A third score runs `toMystmd` on our tree, and compares it with mystmd's tree like the first.
-A fourth score compares our `mystParse` with mystmd's, trees and messages.
-The next section is about the first and third comparisons, and the [`mystParse`](#mystparse) section about the fourth.
+The `dropin` score compares our `mystParse` with mystmd's, trees and messages.
+The next section is about `raw` and `adapted`, and the [`mystParse`](#mystparse) section about `dropin`.
 
 ## What an adapter would need to do
 
