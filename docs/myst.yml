@@ -11,6 +11,7 @@ project:
   toc:
     - file: index.md
     - file: how-it-works.md
+    - file: findings.md
     - file: differences.md
 site:
   template: book-theme

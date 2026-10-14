@@ -32,9 +32,9 @@ We also compare both parsers on 599 `.md` files from real MyST projects: the mys
 | Raw trees matching mystmd's | 157 |
 | Trees matching mystmd's with `toMystmd` | 290 |
 | Files where every start line agrees with mystmd's | 270 |
-| Nodes whose start line differs | 7423 |
-| Parse time, ours (total / median per file) | 952 ms / 0.45 ms |
-| Parse time, mystmd (total / median per file) | 485 ms / 0.23 ms |
+| Nodes whose start line differs | 7395 |
+| Parse time, ours (total / median per file) | 947 ms / 0.44 ms |
+| Parse time, mystmd (total / median per file) | 474 ms / 0.22 ms |
 
 `MYST_CORPUS=<folder> npm run corpus` reproduces these numbers, and does nothing if `MYST_CORPUS` isn't set.
 The corpus isn't part of this repo, so CI doesn't run it.
@@ -51,6 +51,7 @@ The CommonMark score mostly measures where markdown-it and micromark differ.
 The docs cover:
 
 - [How the parser works](docs/how-it-works.md): one micromark extension per MyST syntax.
+- [What we learned](docs/findings.md): what this parser found, and what blocks mystmd from switching.
 - [Why examples fail](docs/differences.md): what `toMystmd` changes, and what it can't.
 - [What was hard about micromark](docs/how-it-works.md#notes-on-micromark).
 
