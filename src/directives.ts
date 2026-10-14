@@ -3,7 +3,7 @@
 // so its nodes get exact positions. Modeled on micromark-extension-directive's container (MIT).
 import type { CompileContext, Extension as FromMarkdownExtension, Token } from 'mdast-util-from-markdown';
 import { factorySpace } from 'micromark-factory-space';
-import { markdownLineEnding, markdownLineEndingOrSpace } from 'micromark-util-character';
+import { markdownLineEnding, markdownLineEndingOrSpace, markdownSpace } from 'micromark-util-character';
 import { codes, constants, types } from 'micromark-util-symbol';
 import type {
   Code,
@@ -29,6 +29,7 @@ declare module 'micromark-util-types' {
     mystOptionMarker: 'mystOptionMarker';
     mystOptionName: 'mystOptionName';
     mystOptionValue: 'mystOptionValue';
+    mystOptionsDelimiter: 'mystOptionsDelimiter';
   }
 }
 
@@ -40,6 +41,8 @@ export function directive(): Extension {
 }
 
 const option: Construct = { tokenize: tokenizeOption, partial: true };
+const yamlOption: Construct = { tokenize: (effects, ok, nok) => tokenizeOption(effects, ok, nok, true), partial: true };
+const yamlDelimiter: Construct = { tokenize: tokenizeYamlDelimiter, partial: true };
 
 function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, nok: State): State {
   const self = this;
@@ -48,10 +51,13 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
   const initialSize =
     tail && tail[1].type === types.linePrefix ? tail[2].sliceSerialize(tail[1], true).length : 0;
   const closingFence: Construct = { tokenize: tokenizeClosingFence, partial: true };
+  const yamlOptions: Construct = { tokenize: tokenizeYamlOptions, partial: true };
+  const blockLine: Construct = { tokenize: tokenizeBlockLine, partial: true };
   let marker: Code;
   let sizeOpen = 0;
-  // Options can only come right after the opening fence, before the body
+  // Options can only come right after the opening fence, before the body, as `:key:` lines or one YAML block
   let inBody = false;
+  let options: 'colon' | 'yaml' | undefined;
   let previous: MicromarkToken | undefined;
   return start;
 
@@ -122,11 +128,18 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
   }
 
   function lineContent(code: Code) {
-    if (!inBody && code === codes.colon) return effects.attempt(option, optionEnd, bodyStart)(code);
+    if (!inBody && !options && code === codes.dash) return effects.attempt(yamlOptions, yamlEnd, bodyStart)(code);
+    if (!inBody && options !== 'yaml' && code === codes.colon) return effects.attempt(option, optionEnd, bodyStart)(code);
     return bodyStart(code);
   }
 
+  function yamlEnd(code: Code) {
+    options = 'yaml';
+    return effects.attempt(nonLazyLine, lineStart, after)(code);
+  }
+
   function optionEnd(code: Code) {
+    options = 'colon';
     return effects.attempt(nonLazyLine, lineStart, after)(code);
   }
 
@@ -191,6 +204,54 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
     return ok(code);
   }
 
+  // A YAML block of options: a `---` line, `key: value` lines, then a `---` line or the end of the directive, like in mystmd.
+  // mystmd reads the block with js-yaml, which we don't depend on, so this reads only flat `key: value` lines,
+  // with the value as the raw text after the colon; docs/differences.md says why that's enough for now.
+  // Any other line, like an indented one, a `- item` or a duplicate key, leaves the whole block as body.
+  // Typed values, `|` blocks, lists and nesting need a YAML parser: read the block's text with one here instead.
+  function tokenizeYamlOptions(this: TokenizeContext, effects: Effects, ok: State, nok: State): State {
+    const self = this;
+    const names = new Set<string>();
+    return effects.attempt(yamlDelimiter, lineEnd, nok);
+
+    function lineEnd(code: Code): State | undefined {
+      if (code === codes.eof) return end(code);
+      return effects.check(blockLine, effects.attempt(nonLazyLine, lineStart, nok), end)(code);
+    }
+
+    // Like js-yaml, a block with no keys isn't options
+    function end(code: Code) {
+      return names.size ? ok(code) : nok(code);
+    }
+
+    function lineStart(code: Code): State | undefined {
+      return initialSize ? factorySpace(effects, line, types.linePrefix, initialSize + 1)(code) : line(code);
+    }
+
+    function line(code: Code) {
+      if (markdownSpace(code)) return factorySpace(effects, blank, types.whitespace)(code);
+      if (atLineEnd(code)) return lineEnd(code);
+      return effects.attempt(yamlDelimiter, end, effects.attempt(yamlOption, optionLine, nok))(code);
+    }
+
+    function blank(code: Code) {
+      return atLineEnd(code) ? lineEnd(code) : nok(code);
+    }
+
+    // The option's name is the text before its colon
+    function optionLine(code: Code) {
+      const name = self.sliceSerialize(self.events[self.events.length - 1][1]).split(':')[0];
+      if (names.has(name)) return nok(code);
+      names.add(name);
+      return lineEnd(code);
+    }
+  }
+
+  // The next line is in the directive: not lazy, and not its closing fence
+  function tokenizeBlockLine(effects: Effects, ok: State, nok: State): State {
+    return effects.attempt(nonLazyLine, effects.check(closingFence, nok, ok), nok);
+  }
+
   function tokenizeClosingFence(this: TokenizeContext, effects: Effects, ok: State, nok: State): State {
     let size = 0;
     const indentMax = this.parser.constructs.disable.null?.includes('codeIndented') ? undefined : constants.tabSize;
@@ -221,13 +282,14 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
   }
 }
 
-// An option line, like `:class: tip`, whose value is parsed as inline markdown
-function tokenizeOption(effects: Effects, ok: State, nok: State): State {
+// An option line, like `:class: tip`, or `class: tip` in a YAML block, whose value is parsed as inline markdown
+function tokenizeOption(effects: Effects, ok: State, nok: State, yaml = false): State {
   const isOptionNameChar = (code: Code) => code !== codes.colon && code !== codes.eof && !markdownLineEndingOrSpace(code);
   return start;
 
   function start(code: Code) {
     effects.enter('mystOption');
+    if (yaml) return nameStart(code);
     effects.enter('mystOptionMarker');
     effects.consume(code); // `:`
     effects.exit('mystOptionMarker');
@@ -250,11 +312,16 @@ function tokenizeOption(effects: Effects, ok: State, nok: State): State {
     effects.enter('mystOptionMarker');
     effects.consume(code);
     effects.exit('mystOptionMarker');
-    return factorySpace(effects, valueStart, types.whitespace);
+    return yaml ? yamlValueStart : factorySpace(effects, valueStart, types.whitespace);
+  }
+
+  // In YAML, a colon starts a value only before a space, and an empty value is null, which we don't read
+  function yamlValueStart(code: Code) {
+    return markdownSpace(code) ? factorySpace(effects, valueStart, types.whitespace)(code) : nok(code);
   }
 
   function valueStart(code: Code) {
-    if (atLineEnd(code)) return end(code);
+    if (atLineEnd(code)) return yaml ? nok(code) : end(code);
     effects.enter('mystOptionValue');
     effects.enter(types.chunkText, { contentType: constants.contentTypeText });
     return value(code);
@@ -273,6 +340,32 @@ function tokenizeOption(effects: Effects, ok: State, nok: State): State {
   function end(code: Code) {
     effects.exit('mystOption');
     return ok(code);
+  }
+}
+
+// A `---` line, which opens and closes a YAML block of options
+function tokenizeYamlDelimiter(effects: Effects, ok: State, nok: State): State {
+  let size = 0;
+  return start;
+
+  function start(code: Code) {
+    effects.enter('mystOptionsDelimiter');
+    return sequence(code);
+  }
+
+  function sequence(code: Code): State | undefined {
+    if (code === codes.dash && size < 3) {
+      size++;
+      effects.consume(code);
+      return sequence;
+    }
+    if (size < 3) return nok(code);
+    effects.exit('mystOptionsDelimiter');
+    return factorySpace(effects, end, types.whitespace)(code);
+  }
+
+  function end(code: Code) {
+    return atLineEnd(code) ? ok(code) : nok(code);
   }
 }
 
@@ -295,13 +388,16 @@ export function directiveFromMarkdown(): FromMarkdownExtension {
         this.enter({ type: 'mystDirectiveArg', value, children: [] }, token);
       },
       mystOption(token) {
-        this.enter({ type: 'mystOption', name: '', location: 'colon', value: true, children: [] }, token);
+        const location = this.sliceSerialize(token).startsWith(':') ? 'colon' : 'yaml';
+        this.enter({ type: 'mystOption', name: '', location, value: true, children: [] }, token);
       },
       mystOptionName(token) {
         current(this).name = this.sliceSerialize(token);
       },
       mystOptionValue(token) {
-        current(this).value = this.sliceSerialize(token);
+        const option = current(this);
+        // YAML drops the spaces at the end of a value
+        option.value = option.location === 'yaml' ? this.sliceSerialize(token).trimEnd() : this.sliceSerialize(token);
       },
       mystDirectiveBody(token) {
         // Like mystmd, remove the fence's indent, then blank lines at the start and whitespace at the end
