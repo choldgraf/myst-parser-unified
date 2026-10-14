@@ -13,6 +13,7 @@ import { math } from 'micromark-extension-math';
 import type { Extension } from 'micromark-util-types';
 import { blocks, blocksFromMarkdown } from './blocks.ts';
 import { citation, citationFromMarkdown, type Citation } from './citations.ts';
+import { definitionList, definitionListFromMarkdown } from './definitionLists.ts';
 import { directive, directiveFromMarkdown } from './directives.ts';
 import { role, roleFromMarkdown } from './roles.ts';
 
@@ -29,6 +30,7 @@ const syntaxes: [Extension, FromMarkdownExtension][] = [
   [citation(), citationFromMarkdown()],
   [directive(), directiveFromMarkdown()],
   [blocks(), blocksFromMarkdown()],
+  [definitionList(), definitionListFromMarkdown()],
 ];
 
 /** Parse MyST markdown to mdast */
@@ -105,6 +107,18 @@ declare module 'mdast' {
     type: 'blockBreak';
     meta?: string;
   }
+  interface DefinitionList extends Parent {
+    type: 'definitionList';
+    children: (DefinitionTerm | DefinitionDescription)[];
+  }
+  interface DefinitionTerm extends Parent {
+    type: 'definitionTerm';
+    children: PhrasingContent[];
+  }
+  interface DefinitionDescription extends Parent {
+    type: 'definitionDescription';
+    children: (BlockContent | DefinitionContent | PhrasingContent)[];
+  }
   interface PhrasingContentMap {
     mystRole: MystRole;
     cite: Cite;
@@ -115,6 +129,7 @@ declare module 'mdast' {
     mystTarget: MystTarget;
     comment: Comment;
     blockBreak: BlockBreak;
+    definitionList: DefinitionList;
   }
   interface RootContentMap {
     mystRole: MystRole;
@@ -128,5 +143,8 @@ declare module 'mdast' {
     mystTarget: MystTarget;
     comment: Comment;
     blockBreak: BlockBreak;
+    definitionList: DefinitionList;
+    definitionTerm: DefinitionTerm;
+    definitionDescription: DefinitionDescription;
   }
 }
