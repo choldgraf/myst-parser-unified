@@ -9,36 +9,8 @@ This repo tests how hard it would be to parse MyST with micromark instead.
 To measure that, we parse the MyST in each [`myst-spec`](https://github.com/jupyter-book/mystmd/tree/main/packages/myst-spec/docs/examples) example with our parser and with mystmd's, and compare the two [mdast](https://github.com/syntax-tree/mdast) trees.
 The passing examples are in [`scoreboard.json`](scoreboard.json).
 
-**Score: 65 of 90 MyST examples match.**
-The 651 CommonMark spec examples are scored separately: 398 of them match.
-
-`toMystmd(tree)` is an optional pass that turns our tree into the shape mystmd's parser builds.
-**With `toMystmd`: 83 of 90 MyST examples and 625 of 651 CommonMark examples match.**
-
-We also run mystmd's directives and roles on our tree, and compare the result with each spec example's expected tree.
-**After directives and roles: 57 of 90 MyST examples and 420 of 651 CommonMark examples match.**
-mystmd's own parser doesn't match all of the spec's trees either, because the spec is older than the parser.
-
-`mystParse` is a drop-in for myst-parser's `mystParse`, and we compare the two, called the same way, on each example: the trees and the messages.
-**With `mystParse`: 89 of 90 MyST examples and 625 of 651 CommonMark examples match.**
-
-`npm run score` reproduces these numbers.
-
-We also compare both parsers on 599 `.md` files from real MyST projects: the mystmd, Jupyter Book and 2i2c docs, example-outputs, and three local docs folders.
-
-| Measure | Result |
-| --- | --- |
-| Files parsed (none threw) | 599 |
-| Raw trees matching mystmd's | 157 |
-| Trees matching mystmd's with `toMystmd` | 290 |
-| Files where every start line agrees with mystmd's | 270 |
-| Nodes whose start line differs | 7395 |
-| Parse time, ours (total / median per file) | 947 ms / 0.44 ms |
-| Parse time, mystmd (total / median per file) | 474 ms / 0.22 ms |
-
-`MYST_CORPUS=<folder> npm run corpus` reproduces these numbers, and does nothing if `MYST_CORPUS` isn't set.
-The corpus isn't part of this repo, so CI doesn't run it.
-Start lines are compared only where both parsers record a position, because markdown-it records lines but not columns.
+**Score: 65 of 90 MyST examples match**, from `npm run score`.
+[What we learned](docs/findings.md#measured-results) has the other scores, and a comparison on real MyST projects.
 
 ## What we found
 
@@ -46,7 +18,7 @@ Every MyST syntax the spec uses, such as roles, directives, targets, comments an
 No example fails because of how MyST syntax is parsed.
 They fail because mystmd's tree isn't plain mdast: it uses curly quotes, sets list `spread` differently, turns bare URLs into links, nests content in `block` nodes, and so on.
 `toMystmd` fixes most of those, but not curly quotes or bare URLs; [the differences page](docs/differences.md) lists them.
-The CommonMark score mostly measures where markdown-it and micromark differ.
+The CommonMark spec examples, scored separately, mostly measure where markdown-it and micromark differ.
 
 The docs cover:
 
@@ -56,6 +28,9 @@ The docs cover:
 - [What was hard about micromark](docs/how-it-works.md#notes-on-micromark).
 
 ## Use it
+
+It isn't on npm, so install it with `npm install github:choldgraf/myst-parser-unified`.
+Installing it builds the JavaScript in `dist/` with `npm run build`.
 
 `parse(src)` returns an mdast tree, and the `remarkMyst` plugin adds the same MyST syntax to remark.
 `toMystmd(tree)` changes a tree, in place, into mystmd's shape:
@@ -79,12 +54,10 @@ const tree = mystParse(src, { directives, roles, vfile, markdownit: { linkify: t
 ```
 
 It runs mystmd's directives and roles, which aren't part of myst-parser's public API.
-So it needs `myst-parser` installed at exactly 1.7.4, a peer dependency: other versions may move or change the files it loads.
+So it needs `myst-parser` installed at the version pinned in `package.json`, a peer dependency: other versions may move or change the files it loads.
 It only runs in Node, and the main entry doesn't need `myst-parser`.
 [The differences page](docs/differences.md#mystparse) says what it doesn't do the same.
 
-It isn't on npm, so install it with `npm install github:choldgraf/myst-parser-unified`.
-Installing it builds the JavaScript in `dist/` with `npm run build`.
 micromark isn't incremental, so this isn't meant for highlighting an editor on every keystroke.
 It can't turn a tree back into MyST yet: there are no `mdast-util-to-markdown` extensions, so `remark-stringify` doesn't know the MyST nodes.
 
@@ -113,6 +86,6 @@ Nothing checks these, so change both sides together:
 - The options and `myst-ext-*` extensions in `test/spec.ts` and `package.json`, from mystmd-client's `parse.ts`.
 - The scorer names in `test/spec.ts` and the `labels` in `scripts/score.ts`, and the columns in `docs/index.md` and `scoreboard.json`.
 - The numbers in this README, `docs/differences.md` and `docs/findings.md`, from `npm run score` and `npm run corpus`; CI checks only `scoreboard.json`.
-- The `myst-parser` 1.7.4 pin in `package.json` (peer and dev), in this README, and the files `src/mystParse.ts` and `test/mystParse.test.ts` require from myst-parser's folder.
+- The `myst-parser` 1.7.4 pin in `package.json` (peer and dev), and the files `src/mystParse.ts` and `test/mystParse.test.ts` require from myst-parser's folder.
 - The mdast node types in `src/parse.ts`, and the nodes each `*FromMarkdown` builds.
 - The syntax list in `docs/how-it-works.md`, and the `syntaxes` array in `src/parse.ts`.
