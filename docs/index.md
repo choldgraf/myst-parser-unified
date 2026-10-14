@@ -6,6 +6,7 @@ title: myst-parser-unified
 :start-line: 2
 ```
 
+(score-per-file)=
 ## Score per file
 
 Each row is a `myst-spec` example file, and the last three rows are the MyST, CommonMark and combined totals.

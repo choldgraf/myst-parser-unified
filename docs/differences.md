@@ -7,7 +7,6 @@ So each difference below is something an adapter from mdast to mystmd's shape wo
 `toMystmd(tree)` is that adapter: an optional pass that changes the tree from `parse` in place.
 Each difference says whether `toMystmd` handles it.
 This parser keeps emitting mdast.
-Whether mystmd wants the adapter is mystmd's call.
 
 ## How examples are compared
 
@@ -25,11 +24,7 @@ A directive's nested parse turns on markdown-it's replacements, like `--` to `â€
 
 [`test/parse.test.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/parse.test.ts) compares MyST syntax edge cases with mystmd in the same way.
 
-That comparison is the `raw` score.
-The `adapted` score runs `toMystmd` on our tree first, then compares it the same way.
-The `transformed` score runs mystmd's `applyDirectives` and `applyRoles` on our tree, and compares it with the spec's expected tree, with the same `normalize()`.
-Some of the spec's trees are older than mystmd's parser, so mystmd's own `mystParse` doesn't match them either.
-The `dropin` score compares our `mystParse` with mystmd's, trees and messages.
+The spec comparison is the `raw` score, and [the score table](index.md#score-per-file) says what the others compare.
 The next section is about `raw` and `adapted`, and the [`mystParse`](#mystparse) section about `dropin`.
 
 ## What an adapter would need to do
@@ -123,8 +118,7 @@ Dollar math and amsmath environments parse like mystmd's, with two differences:
 ## YAML options
 
 mystmd reads a directive's YAML block of options with js-yaml, and we don't depend on a YAML parser.
-In 1858 directives from real projects, 7 have a YAML block: 6 are flat `key: value` lines of plain text, and 1 has a `|` block of several lines.
-None has numbers, booleans, nesting, lists, quotes, anchors or tags, and myst-spec has no YAML blocks at all.
+A scan of the corpus found only a handful of directives with a YAML block, all flat maps of strings, and myst-spec has none.
 So we read flat `key: value` lines, and the value is the text after the colon.
 
 On those, the options and the body match mystmd's.
@@ -161,6 +155,7 @@ Inline options, like ```` ```{note .a #b key=value} ````, parse like mystmd's, w
 - `key=""` is an empty `key` option with no `mystOption` node in mystmd, and here the braces aren't a directive or role.
 - A quoted value can't have backticks here, even in a colon fence or a role, where mystmd allows them.
 
+(mystparse)=
 ## `mystParse`
 
 `mystParse(src, { directives, roles, vfile, markdownit })` in [`src/mystParse.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/mystParse.ts) is a drop-in for myst-parser's `mystParse`.
@@ -169,11 +164,12 @@ Like myst-parser, it adds mystmd's default directives and roles to the ones you 
 
 The `dropin` score calls both with the options `mystmd-client` uses: the directives and roles of the extensions `myst build` turns on, `linkify: true`, and a new vfile for each example.
 An example passes when the trees match after `normalize()`, and the messages match in order on their text, line, rule and whether they're an error.
-Columns aren't compared, but they also match on all 714 passing examples, including the three with messages.
+Columns aren't compared, but they also match on every passing `dropin` example, including the three with messages.
 They can differ elsewhere, because markdown-it has no column data for blocks and nested parses, so mystmd puts some messages at column 1.
 For example, for a role in a `list-table` cell, mystmd says column 1 and ours says the real column.
 
-Every example that fails also fails with `toMystmd`, for the reasons above; the one MyST example is smartquotes.
+Every example that fails also fails with `toMystmd`.
+The one MyST failure is smartquotes.
 Six MyST examples that fail with `toMystmd` pass here, because the directive throws away the part that differed, like a figure's linkified argument.
 mystmd writes messages on three examples, for an unknown directive or role, and ours are the same.
 [`test/mystParse.test.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/mystParse.test.ts) checks a few more: option errors, nested directives, and roles in directive bodies and `list-table` cells.
