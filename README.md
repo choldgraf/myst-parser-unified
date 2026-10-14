@@ -94,7 +94,7 @@ You need Node 24 or later, which runs the TypeScript files directly.
 
 - `npm install`: install the dependencies.
 - `npm run score`: score every example, and write `scoreboard.json` and the data for the site.
-- `npm run score -- "<search>"`: show why the first three examples whose ID contains `<search>` don't match, like `npm run score -- "directives.figure"`.
+- `npm run score -- "<search>"`: show why the first three examples whose ID contains `<search>` don't match mystmd's tree, without `toMystmd`, like `npm run score -- "directives.figure"`.
 - `MYST_CORPUS=<folder> npm run corpus`: compare both parsers on every `.md` file in a folder of MyST projects.
 - `npm test`: check that positions are exact, that syntax edge cases parse like mystmd's parser, that `mystParse` writes the same messages as mystmd's, and that every example in `scoreboard.json` still passes.
 - `npm run typecheck`: check the types with TypeScript.

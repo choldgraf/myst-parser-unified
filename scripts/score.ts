@@ -1,7 +1,7 @@
 // Compare our parser with mystmd's parser on every myst-spec example, without and with `toMystmd`;
 // after directives and roles run, with the spec's expected tree; and our `mystParse` with mystmd's, trees and messages.
 //   npm run score                 score per file, and update scoreboard.json and docs/data/
-//   npm run score -- "<search>"   show why the first three examples whose id contains <search> don't match
+//   npm run score -- "<search>"   show why the first three examples whose id contains <search> don't match, without toMystmd
 import assert from 'node:assert';
 import fs from 'node:fs';
 import { compare, loadCases, scorers } from '../test/spec.ts';
