@@ -6,7 +6,7 @@ import { factorySpace } from 'micromark-factory-space';
 import { markdownLineEnding } from 'micromark-util-character';
 import { codes, constants, types } from 'micromark-util-symbol';
 import type { Code, Construct, Effects, Extension, State, Token as MicromarkToken } from 'micromark-util-types';
-import { current, exit, factoryName } from './shared.ts';
+import { current, exit, factoryHeader } from './shared.ts';
 
 declare module 'micromark-util-types' {
   interface TokenTypeMap {
@@ -35,7 +35,8 @@ function tokenizeRole(effects: Effects, ok: State, nok: State): State {
     effects.enter('mystRoleMarker');
     effects.consume(code); // `{`
     effects.exit('mystRoleMarker');
-    return factoryName(effects, openFenceStart, nok, 'mystRoleName', 'mystRoleMarker');
+    const nameRequired = true;
+    return factoryHeader(effects, openFenceStart, nok, 'mystRoleName', 'mystRoleMarker', nameRequired);
   }
 
   function openFenceStart(code: Code) {

@@ -14,7 +14,7 @@ import type {
   TokenizeContext,
   Token as MicromarkToken,
 } from 'micromark-util-types';
-import { atLineEnd, current, exit, factoryName, nonLazyLine } from './shared.ts';
+import { atLineEnd, current, exit, factoryHeader, nonLazyLine } from './shared.ts';
 
 declare module 'micromark-util-types' {
   interface TokenTypeMap {
@@ -85,7 +85,7 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
     effects.enter('mystDirectiveMarker');
     effects.consume(code);
     effects.exit('mystDirectiveMarker');
-    return factoryName(effects, factorySpace(effects, argStart, types.whitespace), nok, 'mystDirectiveName', 'mystDirectiveMarker');
+    return factoryHeader(effects, factorySpace(effects, argStart, types.whitespace), nok, 'mystDirectiveName', 'mystDirectiveMarker');
   }
 
   // The rest of the opening line is the argument, parsed as inline markdown
@@ -288,7 +288,7 @@ function tokenizeOption(effects: Effects, ok: State, nok: State, yaml = false): 
   return start;
 
   function start(code: Code) {
-    effects.enter('mystOption');
+    effects.enter('mystOption', { _location: yaml ? 'yaml' : 'colon' } as Partial<MicromarkToken>);
     if (yaml) return nameStart(code);
     effects.enter('mystOptionMarker');
     effects.consume(code); // `:`
@@ -377,7 +377,8 @@ export function directiveFromMarkdown(): FromMarkdownExtension {
   return {
     enter: {
       mystDirective(token) {
-        this.enter({ type: 'mystDirective', name: '', processed: false, children: [] }, token);
+        // Like in mystmd, a directive without a name, like `{.class}`, is a `div`
+        this.enter({ type: 'mystDirective', name: 'div', processed: false, children: [] }, token);
       },
       mystDirectiveName(token) {
         current(this).name = this.sliceSerialize(token);
@@ -388,16 +389,21 @@ export function directiveFromMarkdown(): FromMarkdownExtension {
         this.enter({ type: 'mystDirectiveArg', value, children: [] }, token);
       },
       mystOption(token) {
-        const location = this.sliceSerialize(token).startsWith(':') ? 'colon' : 'yaml';
-        this.enter({ type: 'mystOption', name: '', location, value: true, children: [] }, token);
+        // An inline `.class` or `#id` has no name token
+        const first = this.sliceSerialize(token)[0];
+        const name = first === '.' ? 'class' : first === '#' ? 'id' : '';
+        this.enter({ type: 'mystOption', name, location: (token as any)._location, value: true, children: [] }, token);
       },
       mystOptionName(token) {
         current(this).name = this.sliceSerialize(token);
       },
       mystOptionValue(token) {
         const option = current(this);
-        // YAML drops the spaces at the end of a value
-        option.value = option.location === 'yaml' ? this.sliceSerialize(token).trimEnd() : this.sliceSerialize(token);
+        const value = this.sliceSerialize(token);
+        // YAML drops the spaces at the end of a value, and mystmd unescapes and trims a quoted inline one
+        if (option.location === 'yaml') option.value = value.trimEnd();
+        else if (option.location === 'inline') option.value = value.replace(/\\"/g, '"').trim();
+        else option.value = value;
       },
       mystDirectiveBody(token) {
         // Like mystmd, remove the fence's indent, then blank lines at the start and whitespace at the end
@@ -426,12 +432,15 @@ export function directiveFromMarkdown(): FromMarkdownExtension {
   };
 }
 
-// Also collect options on the directive, like mystmd: `class` values add up, otherwise the first one wins
+// Also collect a directive's options, like mystmd: `class` values add up, otherwise the first one wins.
+// The node of an inline `#id` is named `id`, but its option is `label`, like in mystmd. Roles have inline options too, but mystmd doesn't collect them.
 function exitOption(this: CompileContext, token: Token) {
-  const { name, value } = current(this);
+  const { name, value, location } = current(this);
   this.exit(token);
   const directive = current(this);
+  if (directive.type !== 'mystDirective') return;
+  const key = name === 'id' && location === 'inline' ? 'label' : name;
   directive.options ??= {};
-  if (name === 'class' && directive.options.class) directive.options.class += ` ${value}`;
-  else if (directive.options[name] === undefined) directive.options[name] = value;
+  if (key === 'class' && directive.options.class) directive.options.class += ` ${value}`;
+  else if (directive.options[key] === undefined) directive.options[key] = value;
 }
