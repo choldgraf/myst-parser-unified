@@ -8,6 +8,8 @@ Each of `src/roles.ts`, `src/directives.ts`, `src/blocks.ts`, `src/citations.ts`
 - an **mdast extension**, which builds the same nodes that mystmd's parser builds.
 
 [`src/parse.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/parse.ts) puts them together, as `parse()` and the `remarkMyst` plugin.
+`toMystmd()` in [`src/mystmd.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/mystmd.ts) changes that tree into the shape mystmd's parser builds; [Differences from mystmd](differences.md) lists what it changes.
+`mystParse()` in [`src/mystParse.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/mystParse.ts), imported from `myst-parser-unified/mystmd` and for Node only, is a drop-in for myst-parser's `mystParse`; [What we learned](findings.md) says how close it gets.
 Every node gets an exact line, column and offset, including in nested content, so tools like editors can point at the right spot in the source.
 
 ## Roles
