@@ -1,18 +1,16 @@
 import { createRequire } from 'node:module';
-import { pathToFileURL } from 'node:url';
 import type { Root } from 'mdast';
 import { defaultOptions, type mystParse as mystmdParse } from 'myst-parser';
 import { parse, toMystmd } from './parse.ts';
 
 // myst-parser's main entry doesn't export applyDirectives, applyRoles or the VFile it uses,
-// and its package.json `exports` blocks importing its files by path, so we load them from its folder.
+// and its package.json `exports` blocks importing its files by path, so we require them from its folder.
 // That depends on how myst-parser lays out dist/, so package.json pins myst-parser to exactly 1.7.4.
-// `fromMystParser` resolves from myst-parser's own folder, so `vfile` is the one myst-parser uses.
-const fromMystParser = createRequire(createRequire(import.meta.url).resolve('myst-parser'));
-const load = (specifier: string) => import(pathToFileURL(fromMystParser.resolve(specifier)).href);
-const { applyDirectives } = await load('./directives.js');
-const { applyRoles } = await load('./roles.js');
-const { VFile } = await load('vfile');
+// Requiring from myst-parser's folder also means `vfile` is the one myst-parser uses.
+const require = createRequire(createRequire(import.meta.url).resolve('myst-parser'));
+const { applyDirectives } = require('./directives.js');
+const { applyRoles } = require('./roles.js');
+const { VFile } = require('vfile');
 
 type Options = Pick<NonNullable<Parameters<typeof mystmdParse>[1]>, 'directives' | 'roles' | 'vfile' | 'markdownit'>;
 
