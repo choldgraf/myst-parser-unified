@@ -27,7 +27,7 @@
     "dist"
   ],
   "private": true,
-  "license": "BSD-3-Clause",
+  "license": "CC0-1.0",
   "dependencies": {
     "@types/mdast": "^4.0.4",
     "mdast-util-from-markdown": "^2.0.3",
