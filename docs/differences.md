@@ -119,6 +119,31 @@ Dollar math and amsmath environments parse like mystmd's, with two differences:
 - In a tight list item, mystmd moves `$$x$$` out of its paragraph, because its `listItemParagraphs` pass doesn't count a `math` node as inline content.
   Here it stays in the paragraph, like in a loose list item, and `toMystmd` doesn't move it.
 
+## YAML options
+
+mystmd reads a directive's YAML block of options with js-yaml, and we don't depend on a YAML parser.
+In 1858 directives from real projects, 7 have a YAML block: 6 are flat `key: value` lines of plain text, and 1 has a `|` block of several lines.
+None has numbers, booleans, nesting, lists, quotes, anchors or tags, and myst-spec has no YAML blocks at all.
+So we read flat `key: value` lines, and the value is the text after the colon.
+
+On those, the options and the body match mystmd's.
+Like in mystmd, a block with no keys or with a key twice stays in the body, and a block with no closing `---` runs to the end of the directive.
+Anything more needs a YAML parser:
+
+- A value is always a string, so `width: 1.0` is `"1.0"`, where js-yaml reads the number `1`, and the same for `true` and `null`.
+  Quotes and `# comments` stay in the value.
+- A block with any other line, like an indented line, a `|` or `>` block, a `- item`, a comment line or a key with no value, stays in the body.
+  js-yaml reads most of these as options.
+- A value that js-yaml can't read, like `[`, is still an option here, where mystmd leaves the block in the body and writes a warning.
+
+Two differences come from how mystmd handles the body:
+
+- When a `---` block isn't options, mystmd parses the body with the block as front matter, so the body's children leave it out.
+  Here the block stays in the body as a thematic break and text.
+  The body's `value` is the same.
+- After a YAML block, mystmd drops every other `---` line from the body.
+  Here they stay in the body.
+
 ## `mystParse`
 
 `mystParse(src, { directives, roles, vfile, markdownit })` in [`src/mystParse.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/mystParse.ts) is a drop-in for myst-parser's `mystParse`.
@@ -140,7 +165,7 @@ What it doesn't do the same:
 
 - `markdownit` is accepted and ignored, because our parser isn't markdown-it.
 - It doesn't take myst-parser's `mdast` and `extensions` options.
-- mystmd's tokenizer writes a message for YAML options it can't read and for a directive it can't parse, and ours doesn't, because our parser doesn't [support YAML options](how-it-works.md#not-supported-yet) yet.
+- mystmd's tokenizer writes a message for YAML options it can't read and for a directive it can't parse, and ours doesn't.
 - It only runs in Node, because it finds myst-parser's files with `node:module`.
 
 Messages go to the `vfile` you pass, through myst-parser's code, which only calls `vfile.message()`.

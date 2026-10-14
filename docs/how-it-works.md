@@ -34,6 +34,8 @@ The body.
 The fence can use backticks, tildes or colons, and works like a fenced code block.
 A backtick or tilde fence without `{name}` is a normal code block.
 Option lines like `:class: tip` come right after the opening fence.
+Or the first body line can be `---`, followed by `class: tip` lines and another `---`, which is a YAML block of options.
+We read only flat `key: value` lines in that block; [Differences from mystmd](differences.md#yaml-options) says why.
 
 The argument and option values are parsed as inline markdown, and the body as block markdown, all in place.
 So nested directives work, and every node has an exact position.
@@ -112,5 +114,4 @@ Effort is relative to the roles, directives and blocks above.
 
 - Spaces inside a role's braces, like `` { sub }`x` ``. Small.
 - Inline options, like `` {sub .class #id}`2` `` or ```` ```{note .class} ````. Small: adapt the attribute parser in `micromark-extension-directive`.
-- YAML options in a `---` block at the start of a directive. Small, but there are no exact positions for values inside YAML.
 - A colon fence without `{name}`, like `:::note`, which mystmd turns into a code block. Small.
