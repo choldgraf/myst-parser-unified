@@ -93,6 +93,16 @@ A few examples fail for reasons an adapter can't fix:
 - micromark follows CommonMark 0.31.2 and markdown-it follows 0.30, which ended HTML comments differently.
 - markdown-it drops the last line ending of an HTML block at the end of a file.
 
+## Citations
+
+Citations parse like mystmd's, with these differences:
+
+- An `@` after an unclosed `<`, like `<foo\+@bar.com>`, is text here and a citation in mystmd.
+  That keeps CommonMark example 605 passing, which expects text.
+- `![@key]` with no URL is `!` and a `citeGroup` in mystmd, and `![` with a narrative `cite` here, because micromark takes `![` as one token.
+- A `citeGroup` in link text, like `[see [@key]](url)`, stops mystmd from seeing the link.
+  Here it's a link, with the citation as text, like `[@key](url)`.
+
 ## `mystParse`
 
 `mystParse(src, { directives, roles, vfile, markdownit })` in [`src/mystParse.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/mystParse.ts) is a drop-in for myst-parser's `mystParse`.

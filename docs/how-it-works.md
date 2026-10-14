@@ -2,7 +2,7 @@
 
 The parser is `mdast-util-from-markdown` with extensions for MyST.
 micromark splits the source into tokens, and `mdast-util-from-markdown` turns those tokens into an mdast tree.
-Each of `src/roles.ts`, `src/directives.ts` and `src/blocks.ts` exports two extensions:
+Each of `src/roles.ts`, `src/directives.ts`, `src/blocks.ts` and `src/citations.ts` exports two extensions:
 
 - a **micromark extension**, which tells micromark how to find the syntax;
 - an **mdast extension**, which builds the same nodes that mystmd's parser builds.
@@ -49,6 +49,14 @@ The tokenizer is modeled on the `:::name` containers in [`micromark-extension-di
 
 Like a heading, each one can come right after a line of text, without a blank line between.
 
+## Citations
+
+[`src/citations.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/citations.ts) parses citations like `@key`, `@key [p. 3]` and `[see @key, p. 3; -@other]`.
+`@key` is a `cite` node, and brackets make a `citeGroup` node with a `cite` for each part between `;`.
+Like mystmd, a key must come at the start of a line or after a non-alphanumeric character, so `a@b.com` isn't a citation, and neither is an `@` in a URL-like word such as `https://x.com/@user`.
+Inside the text of a link or image, citations are text, so `[@user](url)` is a link.
+The comment at the top of the file says how it matches mystmd's own patterns.
+
 ## Notes on micromark
 
 - micromark's API is low level.
@@ -72,4 +80,3 @@ Effort is relative to the roles, directives and blocks above.
 - Math environments like `\begin{equation}`. Small: one fence-like block construct.
 - Two dollar-math forms: `$$ x $$` on one line as display math, and `$$ … $$ (eq1)` with a label. Medium: adapt `micromark-extension-math`.
 - Definition lists. Medium: `micromark-extension-definition-list` exists, but its node names differ from mystmd's.
-- Citations like `@doe2020` and `[@doe2020; @roe]`. Medium to large: `[` already starts a link in CommonMark, so this has to work with micromark's link handling.
