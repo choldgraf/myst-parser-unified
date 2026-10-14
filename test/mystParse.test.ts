@@ -1,9 +1,12 @@
+import { createRequire } from 'node:module';
 import { mystParse as mystmdParse } from 'myst-parser';
 import { expect, test } from 'vitest';
-// myst-parser's own vfile@5, to check what happens when a caller passes one; this repo's vfile is 6
-import { VFile as VFile5 } from '../node_modules/myst-parser/node_modules/vfile/index.js';
 import { mystParse } from '../src/mystParse.ts';
 import { compareDropin } from './spec.ts';
+
+// myst-parser's own vfile@5, to check what happens when a caller passes one; this repo's vfile is 6.
+// Required from myst-parser's folder, like src/mystParse.ts does, wherever npm puts it; typed as vfile@6, which has the same messages.
+const { VFile: VFile5 }: typeof import('vfile') = createRequire(createRequire(import.meta.url).resolve('myst-parser'))('vfile');
 
 // Each source makes mystmd write at least one message
 const cases = {
@@ -24,7 +27,7 @@ test.each(Object.entries(cases))('%s: same tree and messages as mystmd', (_, src
 test('a vfile@5 gets the same messages as with mystmd', () => {
   const [ours, reference] = [mystParse, mystmdParse].map((parser) => {
     const vfile = new VFile5();
-    parser(cases['a role inside a directive body'], { vfile });
+    parser(cases['a role inside a directive body'], { vfile: vfile as any });
     return vfile.messages.map(({ reason, line, column }) => ({ reason, line, column }));
   });
   expect(ours).toEqual(reference);
