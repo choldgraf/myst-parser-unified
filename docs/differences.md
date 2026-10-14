@@ -6,7 +6,6 @@ mystmd's parser also runs a few extra passes, like smartquotes and resolving ref
 So each difference below is something an adapter from mdast to mystmd's shape would need to do.
 `toMystmd(tree)` is that adapter: an optional pass that changes the tree from `parse` in place.
 Each difference says whether `toMystmd` handles it.
-This parser keeps emitting mdast.
 
 ## How examples are compared
 
@@ -84,7 +83,7 @@ Tables
 : mystmd puts `align` on each cell instead of the table, and marks the cells of the first row with `header: true`.
   `toMystmd` does the same.
 
-A few examples fail for reasons an adapter can't fix:
+Two differences no adapter can fix:
 
 - micromark follows CommonMark 0.31.2 and markdown-it follows 0.30, which ended HTML comments differently.
 - markdown-it drops the last line ending of an HTML block at the end of a file.
@@ -111,14 +110,15 @@ Definition lists parse like mystmd's, with two differences that come from markdo
 Dollar math and amsmath environments parse like mystmd's, with two differences:
 
 - In a list item or block quote, mystmd keeps the container's indent or `> ` in a math block's `value`, because markdown-it slices the value from the source.
-  Here the value is just the math, like a code block's value.
+  Here the value is only the math, like a code block's value.
 - In a tight list item, mystmd moves `$$x$$` out of its paragraph, because its `listItemParagraphs` pass doesn't count a `math` node as inline content.
   Here it stays in the paragraph, like in a loose list item, and `toMystmd` doesn't move it.
 
 ## YAML options
 
 mystmd reads a directive's YAML block of options with js-yaml, and we don't depend on a YAML parser.
-A scan of the corpus found only a handful of directives with a YAML block, all flat maps of strings, and myst-spec has none.
+Every YAML block of options in [the corpus](findings.md#measured-results) is a flat map of strings.
+myst-spec has none.
 So we read flat `key: value` lines, and the value is the text after the colon.
 
 On those, the options and the body match mystmd's.
@@ -164,10 +164,11 @@ Like myst-parser, it adds mystmd's default directives and roles to the ones you 
 
 The `dropin` score calls both with the options `mystmd-client` uses: the directives and roles of the extensions `myst build` turns on, `linkify: true`, and a new vfile for each example.
 An example passes when the trees match after `normalize()`, and the messages match in order on their text, line, rule and whether they're an error.
-Columns aren't compared, but they also match on every passing `dropin` example, including the three with messages.
+Columns aren't compared, but they also match on every passing `dropin` example, including the ones with messages.
 They can differ elsewhere, because markdown-it has no column data for blocks and nested parses, so mystmd puts some messages at column 1.
 For example, for a role in a `list-table` cell, mystmd says column 1 and ours says the real column.
 
+The counts below come from the `adapted` and `dropin` lists in `scoreboard.json`, which `npm run score` writes.
 Every example that fails also fails with `toMystmd`.
 The one MyST failure is smartquotes.
 Six MyST examples that fail with `toMystmd` pass here, because the directive throws away the part that differed, like a figure's linkified argument.

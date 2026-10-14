@@ -13,7 +13,7 @@ Each row is a `myst-spec` example file, and the last three rows are the MyST, Co
 `raw` counts examples that match mystmd's tree before directives and roles run, and `adapted` counts the same after [`toMystmd`](differences.md).
 `transformed` counts examples that match the spec's tree after directives and roles run.
 `dropin` counts examples where our [`mystParse`](differences.md#mystparse) gives the same tree and messages as mystmd's.
-`ceiling` counts examples where myst-parser's own `mystParse` matches the spec's tree, which mystmd misses too where the spec is older than its parser.
+`ceiling` counts examples where myst-parser's own `mystParse` matches the spec's tree.
 The numbers come from the last `npm run score`.
 
 :::{listing}

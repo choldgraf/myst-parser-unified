@@ -17,7 +17,8 @@ The passing examples are in [`scoreboard.json`](scoreboard.json).
 Every MyST syntax the spec uses, such as roles, directives, targets, comments and block breaks, works as a micromark extension, with exact positions.
 No example fails because of how MyST syntax is parsed.
 They fail because mystmd's tree isn't plain mdast: it uses curly quotes, sets list `spread` differently, turns bare URLs into links, nests content in `block` nodes, and so on.
-`toMystmd` fixes most of those, but not curly quotes or bare URLs; [the differences page](docs/differences.md) lists them.
+`toMystmd` fixes most of those, but not curly quotes or bare URLs.
+[The differences page](docs/differences.md) lists them.
 The CommonMark spec examples, scored separately, mostly measure where markdown-it and micromark differ.
 
 The docs cover:
@@ -54,7 +55,8 @@ const tree = mystParse(src, { directives, roles, vfile, markdownit: { linkify: t
 ```
 
 It runs mystmd's directives and roles, which aren't part of myst-parser's public API.
-So it needs `myst-parser` installed at the version pinned in `package.json`, a peer dependency: other versions may move or change the files it loads.
+So it needs `myst-parser` at the version pinned in `package.json`, as a peer dependency.
+Other versions may move or change the files it loads.
 It only runs in Node, and the main entry doesn't need `myst-parser`.
 [The differences page](docs/differences.md#mystparse) says what it doesn't do the same.
 
@@ -85,7 +87,8 @@ Nothing checks these, so change both sides together:
 - The characters inside braces in `src/shared.ts`, from `markdown-it-myst/dist/inlineAttributes.js`.
 - The options and `myst-ext-*` extensions in `test/spec.ts` and `package.json`, from mystmd-client's `parse.ts`.
 - The scorer names in `test/spec.ts` and the `labels` in `scripts/score.ts`, and the columns in `docs/index.md` and `scoreboard.json`.
-- The numbers in this README, `docs/differences.md` and `docs/findings.md`, from `npm run score` and `npm run corpus`; CI checks only `scoreboard.json`.
+- The numbers in this README, `docs/differences.md` and `docs/findings.md`, from `npm run score` and `npm run corpus`.
+  CI checks only `scoreboard.json`.
 - The `myst-parser` 1.7.4 pin in `package.json` (peer and dev), and the files `src/mystParse.ts` and `test/mystParse.test.ts` require from myst-parser's folder.
 - The mdast node types in `src/parse.ts`, and the nodes each `*FromMarkdown` builds.
 - The syntax list in `docs/how-it-works.md`, and the `syntaxes` array in `src/parse.ts`.

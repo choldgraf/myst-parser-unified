@@ -14,8 +14,9 @@ mystmd-client's `parseMyst`, which [mystmd-lsp](https://github.com/choldgraf/mys
 mystmd-lsp's index falls back to the first positioned descendant of a node.
 
 Here every node has an exact line, column and offset, including in role bodies and directive arguments.
-In the drop-in comparison, for a role in a `list-table` cell, mystmd puts the message at column 1 and this parser at the role's column ([details](differences.md#mystparse)).
+The [`mystParse` section](differences.md#mystparse) has a case where mystmd reports column 1 and this parser reports the real column.
 
+(measured-results)=
 ## Measured results
 
 `npm run score` scores the myst-spec examples five ways:
@@ -32,7 +33,14 @@ The last row is a ceiling for the third, because the spec is older than mystmd's
 myst-parser fails 37 MyST examples: figures, tables, block breaks, comments, and options typed as numbers.
 30 of this parser's 33 MyST misses after directives and roles are among them, which comes from comparing the `transformed` and `ceiling` lists in `scoreboard.json`.
 
-`MYST_CORPUS=<folder> npm run corpus` compares both parsers on 599 `.md` files from real projects:
+`MYST_CORPUS=<folder> npm run corpus` compares both parsers on every `.md` file in a local folder, skipping dot-folders and `_build`.
+Our folder held:
+
+- [jupyter-book/mystmd](https://github.com/jupyter-book/mystmd/tree/3b00993/docs) at `3b00993`, its `docs/`.
+- [jupyter-book/jupyter-book](https://github.com/jupyter-book/jupyter-book/tree/11acb1b/docs) at `11acb1b`, its `docs/`.
+- [2i2c-org/docs](https://github.com/2i2c-org/docs/tree/c1ca3ba) at `c1ca3ba`.
+- [jupyter-book/example-outputs](https://github.com/jupyter-book/example-outputs/tree/d7ee89e) at `d7ee89e`.
+- The docs and demo of [mystmd-lsp](https://github.com/choldgraf/mystmd-lsp), this repo's docs, and the README and ROADMAP of [myst-syntax](https://github.com/choldgraf/myst-syntax), as of the start of this work.
 
 | Measure | Result |
 | --- | --- |
@@ -41,8 +49,8 @@ myst-parser fails 37 MyST examples: figures, tables, block breaks, comments, and
 | Trees matching mystmd's with `toMystmd` | 290 |
 | Files where every start line agrees with mystmd's | 270 |
 | Nodes whose start line differs | 7395 |
-| Parse time, ours (total / median per file) | 947 ms / 0.44 ms |
-| Parse time, mystmd (total / median per file) | 474 ms / 0.22 ms |
+| Parse time, ours (total / median per file) | about 950 ms / 0.4 ms |
+| Parse time, mystmd (total / median per file) | about 470 ms / 0.2 ms |
 
 Start lines disagree because markdown-it gives inline nodes on later lines of a paragraph the paragraph's line.
 
@@ -62,7 +70,8 @@ The same page lists two differences that no adapter can fix.
 
 Pre-transform myst-spec mdast, so myst-transforms still run
 : Partly met.
-  The drop-in `mystParse` gives myst-parser's tree and messages on 89 of 90 MyST examples, with a `vfile@5` or `vfile@6` ([`test/mystParse.test.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/mystParse.test.ts)).
+  The drop-in `mystParse` gives myst-parser's tree and messages on all but one MyST example ([Measured results](#measured-results)).
+  It accepts a `vfile@5` or `vfile@6` ([`test/mystParse.test.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/mystParse.test.ts)).
   Smartquotes and linkify are the gap.
 
 Positions for the parts inside nodes
@@ -77,12 +86,15 @@ Tolerance of half-typed input
   No corpus file threw.
 
 Speed enough to parse every project page
-: Met; see the corpus table above.
+: Met, as the corpus table above shows.
 
-Two changes upstream would help:
+## What it needs upstream
 
-- myst-parser could export `applyDirectives` and `applyRoles`, or accept a custom tokenizer, since today we reach them through `dist/` with an exact pin ([mystmd#1705](https://github.com/jupyter-book/mystmd/issues/1705), [U10 mdast adapter](https://github.com/choldgraf/myst-author/blob/main/upstream/U10-mdast-adapter.md)).
-- myst-spec could be a conformance suite that other parsers reuse ([mystmd#3078](https://github.com/jupyter-book/mystmd/issues/3078)).
+- Column positions in mystmd's parser ([mystmd#2864](https://github.com/jupyter-book/mystmd/issues/2864)).
+- A unified-native parser for mystmd ([mystmd#1705](https://github.com/jupyter-book/mystmd/issues/1705)).
+- myst-spec as a conformance suite that other parsers reuse ([mystmd#3078](https://github.com/jupyter-book/mystmd/issues/3078)).
+- An mdast adapter in mystmd, myst-author's proposal U10 ([myst-author upstream asks](https://github.com/choldgraf/myst-author/blob/main/upstream/README.md)).
+- myst-parser exporting `applyDirectives` and `applyRoles`, or accepting a custom tokenizer, so `mystParse` doesn't need an exact pin ([mystmd#1705](https://github.com/jupyter-book/mystmd/issues/1705)).
 
 ## Where it could go next
 
