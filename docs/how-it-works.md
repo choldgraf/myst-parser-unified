@@ -2,7 +2,7 @@
 
 The parser is `mdast-util-from-markdown` with extensions for MyST.
 micromark splits the source into tokens, and `mdast-util-from-markdown` turns those tokens into an mdast tree.
-Each of `src/roles.ts`, `src/directives.ts`, `src/blocks.ts` and `src/citations.ts` exports two extensions:
+Each of `src/roles.ts`, `src/directives.ts`, `src/blocks.ts`, `src/citations.ts` and `src/definitionLists.ts` exports two extensions:
 
 - a **micromark extension**, which tells micromark how to find the syntax;
 - an **mdast extension**, which builds the same nodes that mystmd's parser builds.
@@ -57,6 +57,27 @@ Like mystmd, a key must come at the start of a line or after a non-alphanumeric 
 Inside the text of a link or image, citations are text, so `[@user](url)` is a link.
 The comment at the top of the file says how it matches mystmd's own patterns.
 
+## Definition lists
+
+[`src/definitionLists.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/definitionLists.ts) parses definition lists like this:
+
+```markdown
+Term
+: A description.
+: Another description.
+
+Another term
+
+~ A description after a blank line.
+```
+
+A description starts with `:` or `~` and a space, and lines indented two spaces more than its marker continue it.
+Each description is a micromark container, like a list item, so it can hold paragraphs, lists, code and directives, and lazy lines work the same way.
+A term is a paragraph of one line, right before a description or before one blank line and a description.
+A description right after another one needs no term.
+Like mystmd, a list is loose if a description has a blank line inside it or before the next description.
+In a tight list, a description's text goes straight in the `definitionDescription` node, without a paragraph.
+
 ## Notes on micromark
 
 - micromark's API is low level.
@@ -67,6 +88,9 @@ The comment at the top of the file says how it matches mystmd's own patterns.
   Plain `+++` works in both.
 - `npm test` uses vitest, which loads micromark's development build.
   That build checks that tokenizers follow micromark's rules, and the normal build doesn't.
+- micromark tries a new container twice: once to check, and again after closing the paragraph before it.
+  So a definition description can't read its term from the paragraph before it, which changes between the two tries.
+  Instead, a construct that never matches records where each paragraph starts, and the description looks that up.
 
 ## Not supported yet
 
@@ -79,4 +103,3 @@ Effort is relative to the roles, directives and blocks above.
 - A colon fence without `{name}`, like `:::note`, which mystmd turns into a code block. Small.
 - Math environments like `\begin{equation}`. Small: one fence-like block construct.
 - Two dollar-math forms: `$$ x $$` on one line as display math, and `$$ … $$ (eq1)` with a label. Medium: adapt `micromark-extension-math`.
-- Definition lists. Medium: `micromark-extension-definition-list` exists, but its node names differ from mystmd's.

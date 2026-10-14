@@ -101,6 +101,15 @@ Citations parse like mystmd's, with these differences:
 - A `citeGroup` in link text, like `[see [@key]](url)`, stops mystmd from seeing the link.
   Here it's a link, with the citation as text, like `[@key](url)`.
 
+## Definition lists
+
+Definition lists parse like mystmd's, with two differences that come from markdown-it-deflist:
+
+- After a description, mystmd takes any line followed by a description as the next term, even a heading like `# Heading` or a list item like `- item`.
+  Here a term is always a paragraph, so those stay a heading or a list.
+- A term and a description indented inside a description, right after its text, stay text in both parsers.
+  But for `Term\n: Text\n  Term 2\n  : Text 2`, mystmd's text is `Text\nTerm 2: Text 2`, without the line ending before the `:`.
+
 ## `mystParse`
 
 `mystParse(src, { directives, roles, vfile, markdownit })` in [`src/mystParse.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/mystParse.ts) is a drop-in for myst-parser's `mystParse`.
