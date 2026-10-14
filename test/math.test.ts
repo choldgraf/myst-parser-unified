@@ -2,7 +2,8 @@ import { expect, test } from 'vitest';
 import { parse, toMystmd } from '../src/parse.ts';
 import { mystmd, normalize } from './spec.ts';
 
-// myst-spec has no dollar math or amsmath examples, so compare these with mystmd's parser
+// myst-spec has no dollar math or amsmath examples, so compare these with mystmd's parser.
+// toMystmd only adapts the list item's `spread` in one of these, not the math.
 const cases = {
   'a label on one line': '$$ x $$ (eq1)',
   'a label after the closing fence': '$$\nx\n$$ (eq1)',
