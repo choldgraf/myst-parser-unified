@@ -84,8 +84,7 @@ It only runs in Node, and the main entry doesn't need `myst-parser`.
 [The differences page](docs/differences.md#mystparse) says what it doesn't do the same.
 
 It isn't on npm, so install it with `npm install github:choldgraf/myst-parser-unified`.
-It's written in TypeScript, and Node won't run TypeScript from `node_modules`.
-So use it from a bundler or a workspace.
+Installing it builds the JavaScript in `dist/` with `npm run build`.
 micromark isn't incremental, so this isn't meant for highlighting an editor on every keystroke.
 It can't turn a tree back into MyST yet: there are no `mdast-util-to-markdown` extensions, so `remark-stringify` doesn't know the MyST nodes.
 
@@ -99,5 +98,6 @@ You need Node 24 or later, which runs the TypeScript files directly.
 - `MYST_CORPUS=<folder> npm run corpus`: compare both parsers on every `.md` file in a folder of MyST projects.
 - `npm test`: check that positions are exact, that syntax edge cases parse like mystmd's parser, that `mystParse` writes the same messages as mystmd's, and that every example in `scoreboard.json` still passes.
 - `npm run typecheck`: check the types with TypeScript.
+- `npm run build`: write JavaScript and type declarations to `dist/`.
 - `npm run docs`: score, then build the [docs site](https://chrisholdgraf.com/myst-parser-unified/).
 - `npm run docs:live`: score, then serve the site locally.
