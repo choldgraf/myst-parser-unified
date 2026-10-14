@@ -18,7 +18,6 @@ flowchart LR
   out -.-> score
 ```
 
-`mystParse()` is `toMystmd(parse(src))` followed by `applyDirectives` and `applyRoles`.
 When a directive parses its body, that body goes back through `mystParse()`, with its line numbers shifted to where it sits in the file.
 
 ## A worked example
@@ -68,7 +67,6 @@ Each of `src/roles.ts`, `src/directives.ts`, `src/blocks.ts`, `src/citations.ts`
 [Differences from mystmd](differences.md) lists what it changes.
 `mystParse()` in [`src/mystParse.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/mystParse.ts) is a drop-in for myst-parser's `mystParse`, imported from `myst-parser-unified/mystmd` and for Node only.
 [What we learned](findings.md) says how close it gets.
-Every node gets an exact line, column and offset, including in nested content.
 
 ## Roles
 
