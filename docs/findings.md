@@ -32,7 +32,8 @@ The [`mystParse` section](differences.md#mystparse) has a case where mystmd repo
 
 The last row is a ceiling for the third, because the spec is older than mystmd's parser.
 myst-parser fails 37 MyST examples: figures, tables, block breaks, comments, and options typed as numbers.
-30 of this parser's 33 MyST misses after directives and roles are among them, which comes from comparing the `transformed` and `ceiling` lists in `scoreboard.json`.
+30 of this parser's 33 MyST misses after directives and roles are among them.
+That comes from comparing the `transformed` and `ceiling` lists in `scoreboard.json`.
 
 `MYST_CORPUS=<folder> npm run corpus` compares both parsers on every `.md` file in a local folder, skipping dot-folders and `_build`.
 Our folder held:

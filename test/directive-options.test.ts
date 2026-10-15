@@ -18,7 +18,7 @@ test.each(Object.entries(cases))('%s parses like mystmd', (_, src) => {
 });
 
 // When a `---` block isn't options, mystmd's nested parse of the body drops it as front matter,
-// so compare only the options and the body's text; docs/differences.md covers this
+// so compare only the options and the body's text. docs/differences.md covers this
 const notOptions = {
   'a key twice': '```{note}\n---\nclass: a\nclass: b\n---\n```',
   'an empty block': '```{note}\n---\n---\nBody\n```',

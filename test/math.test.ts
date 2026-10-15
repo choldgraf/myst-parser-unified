@@ -31,7 +31,7 @@ test.each(Object.entries(cases))('%s parses like mystmd', (_, src) => {
   expect(normalize(toMystmd(parse(src)))).toEqual(normalize(mystmd(src, { nestBlocks: false })));
 });
 
-// mystmd slices the source, so it keeps the list item's indent in the value; docs/differences.md covers this
+// mystmd slices the source, so it keeps the list item's indent in the value. docs/differences.md covers this
 test('an environment in a list item has no indent in its value', () => {
   const src = '- \\begin{equation}\n  x\n  \\end{equation}';
   expect((parse(src) as any).children[0].children[0].children[0].value).toBe('\\begin{equation}\nx\n\\end{equation}');

@@ -26,7 +26,7 @@ test.each(Object.entries(cases))('%s parses like mystmd', (_, src) => {
 /** The cite nodes in a tree */
 const cites = (node: any): any[] => (node.type === 'cite' ? [node] : (node.children ?? []).flatMap(cites));
 
-// mystmd turns these into links with linkify, which docs/differences.md covers; neither parser sees a citation
+// mystmd turns these into links with linkify, which docs/differences.md covers. Neither parser sees a citation
 test.each(['a@b.com', 'https://x.com/@user', 'hackmd.com/@user'])('%s has no citation, like mystmd', (src) => {
   expect(cites(parse(src))).toEqual([]);
   expect(cites(mystmd(src))).toEqual([]);

@@ -4,8 +4,8 @@ import { expect, test } from 'vitest';
 import { mystParse } from '../src/mystParse.ts';
 import { compareDropin } from './spec.ts';
 
-// myst-parser's own vfile@5, to check what happens when a caller passes one; this repo's vfile is 6.
-// Required from myst-parser's folder, like src/mystParse.ts does, wherever npm puts it; typed as vfile@6, which has the same messages.
+// myst-parser's own vfile@5, to check what happens when a caller passes one. This repo's vfile is 6.
+// It's required from myst-parser's folder, like src/mystParse.ts does, and typed as vfile@6, which has the same messages.
 const { VFile: VFile5 }: typeof import('vfile') = createRequire(createRequire(import.meta.url).resolve('myst-parser'))('vfile');
 
 // Each source makes mystmd write at least one message

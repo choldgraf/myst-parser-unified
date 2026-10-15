@@ -248,7 +248,8 @@ function tokenizeGroup(this: TokenizeContext, effects: Effects, ok: State, nok: 
 
 /**
  * Citations inside the text of a link or image are text, like in mystmd.
- * Links are resolved by then, so their text is in `labelText` tokens; micromark runs a shared resolver once.
+ * Links are resolved by then, so their text is in `labelText` tokens.
+ * Both constructs share this resolver, and micromark runs it once.
  */
 function resolveAll(events: Event[]) {
   let depth = 0;

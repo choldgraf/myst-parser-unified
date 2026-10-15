@@ -26,14 +26,15 @@ export const charClass = (re: RegExp) => (code: Code) => code !== null && code >
 const isNameChar = charClass(/[\w:-]/);
 /** A character in an inline option's key, class or id */
 const isKeyChar = charClass(/[\w-]/);
-/** A character inside the braces; like a backtick fence's info string, we don't allow backticks */
+/** A character inside the braces. Like a backtick fence's info string, the braces can't hold backticks. */
 const inBraces = (code: Code) =>
   code !== codes.eof && code !== codes.rightCurlyBrace && code !== codes.graveAccent && !markdownLineEnding(code);
 
 /**
  * The inside of a role's or directive's braces and the `}` after it, like mystmd's `inlineAttributes`.
  * The inside is words separated by whitespace: a name, then options like `.class`, `#id`, `key=value` or `key="a value"`.
- * A directive's name is optional, and anything mystmd rejects, like a second name or a word like `a.b`, is `nok`, so it's text or code.
+ * A directive's name is optional.
+ * Anything mystmd rejects, like a second name or a word like `a.b`, is `nok`, so the braces stay text or code.
  */
 export function factoryHeader(
   effects: Effects,
@@ -193,8 +194,9 @@ export function factoryHeader(
 export const atLineEnd = (code: Code) => code === codes.eof || markdownLineEnding(code);
 
 /**
- * Consume codes with each line's characters in a `type` token and each line ending in its own,
- * which micromark needs to split the lines up again; `close` exits the last line's token.
+ * Consume codes, with each line's characters in a `type` token and each line ending in its own token.
+ * micromark needs that to split the lines up again.
+ * `close` exits the last line's token.
  */
 export function dataConsumer(effects: Effects, type: TokenType) {
   let open = false;
@@ -240,7 +242,7 @@ function tokenizeNonLazyLine(this: TokenizeContext, effects: Effects, ok: State,
 /** The mdast node being built */
 export const current = (context: CompileContext) => context.stack[context.stack.length - 1] as any;
 
-/** An mdast exit handler that just closes the node */
+/** An mdast exit handler that only closes the node */
 export function exit(this: CompileContext, token: Token) {
   this.exit(token);
 }

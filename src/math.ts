@@ -1,6 +1,6 @@
 // Dollar math and amsmath environments, as micromark extensions that follow mystmd's
 // markdown-it-dollarmath and markdown-it-amsmath, rule for rule:
-// - `$x$` is inline math, and `$$x$$` in a paragraph is display math; a `$` after an odd number of backslashes doesn't close it.
+// - `$x$` is inline math, and `$$x$$` in a paragraph is display math. A `$` after an odd number of backslashes doesn't close either.
 // - A `$$` block ends at the first line that ends with `$$`, or with `$$ (label)`, and can't have blank lines or interrupt a paragraph.
 // - `\begin{equation}` and the other top-level environments end at the matching `\end{…}`, wherever it is.
 // Like mystmd, the blocks run on through lazy lines, and a container like a list can't start inside them.
@@ -90,7 +90,7 @@ function closing(line: string): { end: number; label?: string } | undefined {
   if (match) return { end: match.index, label: match[1].replace(/\s+/g, '-') };
 }
 
-// `$$` up to a line that closes it; the first line closes it only if it has more than `$$` and one character
+// `$$` up to a line that closes it. The first line closes it only if it has more than `$$` and one character.
 function tokenizeBlock(this: TokenizeContext, effects: Effects, ok: State, nok: State): State {
   const self = this;
   const data = dataConsumer(effects, 'mathData');

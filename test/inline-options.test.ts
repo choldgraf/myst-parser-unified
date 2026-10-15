@@ -23,7 +23,7 @@ test.each(Object.entries(cases))('%s parses like mystmd', (_, src) => {
   expect(normalize(parse(src))).toEqual(normalize(mystmd(src)));
 });
 
-// mystmd parses a directive's `key=value` twice, so its text is doubled, like `valuevalue`;
+// mystmd parses a directive's `key=value` twice, so its text is doubled, like `valuevalue`.
 // docs/differences.md covers this, so compare the options and the option's value
 test.each([
   ['```{note key=value}\nBody\n```', 'value'],
@@ -36,7 +36,7 @@ test.each([
   expect(ours.children[0].children).toEqual([expect.objectContaining({ type: 'text', value })]);
 });
 
-// mystmd gives an error node for these, and we don't build error nodes; docs/differences.md covers this
+// mystmd gives an error node for these, and we don't build error nodes. docs/differences.md covers this
 test.each(['```{ }\nBody\n```', '```{note a b}\nBody\n```', '```{note .a.b}\nBody\n```', '```{note #1}\nBody\n```'])(
   '`%s` is a code block here and an error in mystmd',
   (src) => {

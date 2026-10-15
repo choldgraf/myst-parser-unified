@@ -56,10 +56,9 @@ Then check [What must stay in sync by hand](index.md#what-must-stay-in-sync-by-h
 
 The parser is `mdast-util-from-markdown` with extensions for MyST.
 micromark splits the source into tokens, and `mdast-util-from-markdown` turns those tokens into an mdast tree.
-Each of `src/roles.ts`, `src/directives.ts`, `src/blocks.ts`, `src/citations.ts`, `src/definitionLists.ts` and `src/math.ts` exports two extensions:
-
-- a **micromark extension**, which tells micromark how to find the syntax;
-- an **mdast extension**, which builds the same nodes that mystmd's parser builds.
+Each of `src/roles.ts`, `src/directives.ts`, `src/blocks.ts`, `src/citations.ts`, `src/definitionLists.ts` and `src/math.ts` exports two extensions.
+The micromark extension tells micromark how to find the syntax.
+The mdast extension builds the same nodes that mystmd's parser builds.
 
 [`src/parse.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/parse.ts) puts them together with micromark's extensions for front matter, GFM footnotes, GFM tables and GFM task lists, as `parse()` and the `remarkMyst` plugin.
 `toMystmd()` in [`src/mystmd.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/mystmd.ts) changes that tree into the shape mystmd's parser builds.
@@ -109,8 +108,8 @@ The tokenizer is modeled on the `:::name` containers in [`micromark-extension-di
 
 [`src/blocks.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/blocks.ts) parses three constructs that each take up a whole line:
 
-- targets, like `(my-label)=`, which label the next block so you can link to it;
-- comments, like `% a comment`, where several `%` lines in a row make one comment;
+- targets, like `(my-label)=`, which label the next block so you can link to it.
+- comments, like `% a comment`, where several `%` lines in a row make one comment.
 - block breaks, like `+++` or `+++ {"meta": "data"}`, which split a page into blocks.
 
 Like a heading, each one can come right after a line of text, without a blank line between.

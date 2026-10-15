@@ -16,7 +16,7 @@ type Options = Pick<NonNullable<Parameters<typeof mystmdParse>[1]>, 'directives'
 
 /**
  * Parse MyST like myst-parser's `mystParse`: our tree, in mystmd's shape, after mystmd's directives and roles run.
- * `markdownit` is accepted and ignored; docs/differences.md says why.
+ * `markdownit` is accepted and ignored. docs/differences.md says why.
  */
 export function mystParse(src: string, opts?: Options): Root {
   return applyDirectivesAndRoles(toMystmd(parse(src)), (source) => mystParse(source, opts), opts);

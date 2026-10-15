@@ -49,7 +49,7 @@ function lineStart(self: TokenizeContext): Point {
 // Never matches: it records where each paragraph (or table) starts, so that descriptions can find their term.
 // Blank lines, indented code, headings, fences and the like match earlier constructs, so they never get here.
 function tokenizeBlockStart(this: TokenizeContext, _effects: Effects, _ok: State, nok: State): State {
-  // Paragraphs check if the next line interrupts them; that isn't a block start
+  // A paragraph checks whether the next line interrupts it, and that check isn't a block start
   if (!this.interrupt) (this.parser.blockStarts ??= new Map()).set(this.now().line, lineStart(this).column);
   return nok;
 }
@@ -97,7 +97,7 @@ function afterTerm(self: TokenizeContext, start: Point): boolean {
     if (kind === 'enter' && (token._container || token.type === types.listItemPrefix)) return false;
   }
   if (index < 0) return false;
-  // That chunk is the line before; if it's blank, the term is the line before that
+  // That chunk is the line before. If it's blank, the term is the line before that.
   const previousLineBlank = !self.sliceSerialize(self.events[index][1]).trim();
   const term = start.line - (previousLineBlank ? 2 : 1);
   return self.parser.blockStarts?.get(term) === start.column;

@@ -35,7 +35,7 @@ function timed(name: keyof typeof times, run: () => any) {
   }
 }
 
-/** Nodes whose start line differs from mystmd's, pairing children by index; markdown-it has no columns */
+/** Nodes whose start line differs from mystmd's, pairing children by index. Only lines, because markdown-it has no columns. */
 function lineDisagreements(ours: any, reference: any): number {
   const here = ours.position && reference.position && ours.position.start.line !== reference.position.start.line;
   const a = ours.children ?? [];

@@ -28,7 +28,7 @@ function nestBlocks(tree: any) {
   tree.children = children;
 }
 
-/** Each definition by its identifier; the first one wins, like in CommonMark */
+/** Each definition by its identifier. The first one wins, like in CommonMark. */
 function findDefinitions(node: any, found = new Map<string, any>()) {
   if (node.type === 'definition' && !found.has(node.identifier)) found.set(node.identifier, node);
   node.children?.forEach((child: any) => findDefinitions(child, found));
@@ -42,7 +42,7 @@ function adapt(node: any, definitions: Map<string, any>): any {
       .filter((child: any) => child.type !== 'definition')
       .map((child: any) => adapt(child, definitions));
   }
-  // Resolve references to links and images; micromark only makes a reference when its definition exists
+  // Resolve references to links and images. micromark only builds a reference when its definition exists, so the lookup can't miss.
   if (node.type === 'linkReference' || node.type === 'imageReference') {
     const { identifier, label, referenceType, ...rest } = node;
     const { url, title } = definitions.get(identifier);

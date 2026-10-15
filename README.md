@@ -46,7 +46,8 @@ const sameTree = unified().use(remarkParse).use(remarkMyst).parse(src);
 const mystmdTree = toMystmd(parse(src));
 ```
 
-`mystParse` from `myst-parser-unified/mystmd` takes myst-parser's `directives`, `roles`, `vfile` and `markdownit` options, returns the same tree as myst-parser's `mystParse`, and writes the same messages to `vfile`:
+`mystParse` from `myst-parser-unified/mystmd` is a drop-in for myst-parser's `mystParse`.
+It takes the same `directives`, `roles`, `vfile` and `markdownit` options, returns the same tree, and writes the same messages to `vfile`:
 
 ```js
 import { mystParse } from 'myst-parser-unified/mystmd';
@@ -57,7 +58,8 @@ const tree = mystParse(src, { directives, roles, vfile, markdownit: { linkify: t
 It runs mystmd's directives and roles, which aren't part of myst-parser's public API.
 So it needs `myst-parser` at the version pinned in `package.json`, as a peer dependency.
 Other versions may move or change the files it loads.
-It only runs in Node, and the main entry doesn't need `myst-parser`.
+It only runs in Node.
+The main entry doesn't need `myst-parser`.
 [The differences page](docs/differences.md#mystparse) says what it doesn't do the same.
 
 micromark isn't incremental, so this isn't meant for highlighting an editor on every keystroke.
@@ -69,7 +71,8 @@ You need Node 24 or later, which runs the TypeScript files directly.
 
 - `npm install`: install the dependencies.
 - `npm run score`: score every example, and write `scoreboard.json` and the data for the site.
-- `npm run score -- "<search>"`: show why the first three examples whose ID contains `<search>` don't match mystmd's tree, without `toMystmd`, like `npm run score -- "directives.figure"`.
+- `npm run score -- "directives.figure"`: show why the first three examples whose ID contains that text don't match mystmd's tree.
+  This compares the raw tree, before `toMystmd`.
 - `MYST_CORPUS=<folder> npm run corpus`: compare both parsers on every `.md` file in a folder of MyST projects.
 - `npm test`: check that positions are exact, that syntax edge cases parse like mystmd's parser, that `mystParse` writes the same messages as mystmd's, and that every example in `scoreboard.json` still passes.
 - `npm run typecheck`: check the types with TypeScript.

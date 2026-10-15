@@ -52,7 +52,7 @@ export function transformed(src: string): Root {
   return applyDirectivesAndRoles(parse(src), transformed);
 }
 
-/** Remove differences we don't care about; docs/differences.md says which and why. */
+/** Remove differences we don't care about. docs/differences.md says which and why. */
 export function normalize(tree: Root): Root {
   const ignore = (key: string, value: unknown) => key === 'position' || key === 'tight' || value === null;
   return JSON.parse(JSON.stringify(tree, (key, value) => (ignore(key, value) ? undefined : value)));
@@ -86,7 +86,7 @@ const messages = (vfile: VFile) => vfile.messages.map(({ reason, line, ruleId, f
 export function compareDropin({ src }: { src: string }) {
   const parseWith = (parser: typeof mystParse) => {
     const vfile = new VFile();
-    // myst-parser's types want vfile@5; vfile@6 records its messages the same way
+    // myst-parser's types want vfile@5, and vfile@6 records its messages the same way
     const tree = normalize(parser(src, { ...extensions, vfile: vfile as any }));
     return { tree, messages: messages(vfile) };
   };
@@ -102,7 +102,7 @@ export function compareCeiling({ src, mdast }: Case) {
   return { ours, reference, match: isDeepStrictEqual(ours, reference) };
 }
 
-/** The scores; docs/index.md says what each one compares */
+/** The scorers. docs/index.md says what each one compares. */
 export const scorers = {
   raw: (c: Case) => compare(c),
   adapted: (c: Case) => compare(c, toMystmd),

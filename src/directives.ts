@@ -1,6 +1,6 @@
 // MyST directives, like ```{note} with backtick, tilde or colon fences, as a micromark extension.
-// The fence works like a fenced code block, and the body is parsed as markdown by micromark itself,
-// so its nodes get exact positions. Modeled on micromark-extension-directive's container (MIT).
+// The fence works like a fenced code block, and micromark itself parses the body as markdown, so its nodes get exact positions.
+// Modeled on micromark-extension-directive's container (MIT).
 import type { CompileContext, Extension as FromMarkdownExtension, Token } from 'mdast-util-from-markdown';
 import { factorySpace } from 'micromark-factory-space';
 import { markdownLineEnding, markdownLineEndingOrSpace, markdownSpace } from 'micromark-util-character';
@@ -204,11 +204,11 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
     return ok(code);
   }
 
-  // A YAML block of options: a `---` line, `key: value` lines, then a `---` line or the end of the directive, like in mystmd.
-  // mystmd reads the block with js-yaml, which we don't depend on, so this reads only flat `key: value` lines,
-  // with the value as the raw text after the colon; docs/differences.md says why that's enough for now.
-  // Any other line, like an indented one, a `- item` or a duplicate key, leaves the whole block as body.
-  // Typed values, `|` blocks, lists and nesting need a YAML parser: read the block's text with one here instead.
+  // A YAML block of options, like in mystmd: a `---` line, `key: value` lines, then a `---` line or the end of the directive.
+  // mystmd reads the block with js-yaml, which we don't depend on, so this reads only flat `key: value` lines.
+  // The value is the raw text after the colon, and docs/differences.md says why that's enough for now.
+  // Any other line, like an indented one, a `- item` or a duplicate key, leaves the whole block in the body.
+  // Typed values, `|` blocks, lists and nesting need a YAML parser, which could read the block's text from here.
   function tokenizeYamlOptions(this: TokenizeContext, effects: Effects, ok: State, nok: State): State {
     const self = this;
     const names = new Set<string>();
@@ -429,7 +429,7 @@ function tokenizeOption(effects: Effects, ok: State, nok: State, yaml = false): 
     return yaml ? yamlValueStart : factorySpace(effects, valueStart, types.whitespace);
   }
 
-  // In YAML, a colon starts a value only before a space, and an empty value is null, which we don't read
+  // In YAML, a colon only starts a value when a space follows it. An empty value is null, which we don't read.
   function yamlValueStart(code: Code) {
     return markdownSpace(code) ? factorySpace(effects, valueStart, types.whitespace)(code) : nok(code);
   }
@@ -520,8 +520,8 @@ export function directiveFromMarkdown(): FromMarkdownExtension {
         else option.value = value;
       },
       mystDirectiveBody(token) {
-        // Like mystmd, remove the fence's indent, then blank lines at the start and whitespace at the end
-        // (the first line's indent is already outside the body)
+        // Like mystmd, remove the fence's indent from each line, then blank lines at the start and whitespace at the end.
+        // The first line's indent is already outside the body token.
         const indent = new RegExp(`\n {0,${token._indent}}`, 'g');
         const value = this.sliceSerialize(token).replace(indent, '\n').replace(/^([ \t]*\r?\n)+/, '').trimEnd();
         current(this).value = value;
@@ -546,8 +546,9 @@ export function directiveFromMarkdown(): FromMarkdownExtension {
   };
 }
 
-// Also collect a directive's options, like mystmd: `class` values add up, otherwise the first one wins.
-// The node of an inline `#id` is named `id`, but its option is `label`, like in mystmd. Roles have inline options too, but mystmd doesn't collect them.
+// Also collect a directive's options, like mystmd: `class` values add up, and otherwise the first one wins.
+// The node of an inline `#id` is named `id`, but its option is `label`, like in mystmd.
+// Roles have inline options too, but mystmd doesn't collect them.
 function exitOption(this: CompileContext, token: Token) {
   const { name, value, location } = current(this);
   this.exit(token);
