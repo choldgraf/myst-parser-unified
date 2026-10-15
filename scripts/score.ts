@@ -36,7 +36,7 @@ if (search !== undefined) {
     const file = c.id.split(':')[0];
     // The CommonMark spec is one file, and every other file is MyST's own examples
     const key = file.startsWith('cmark_spec') ? 'commonmark' : 'myst';
-    const counts = byFile.get(file) ?? { raw: 0, adapted: 0, transformed: 0, dropin: 0, ceiling: 0, total: 0 };
+    const counts = byFile.get(file) ?? ({ ...Object.fromEntries(names.map((n) => [n, 0])), total: 0 } as Record<keyof typeof scorers | 'total', number>);
     byFile.set(file, counts);
     counts.total++;
     for (const name of names) {

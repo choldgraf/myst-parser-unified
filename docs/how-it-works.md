@@ -37,11 +37,10 @@ On other input it renames nodes, like `blockBreak` to `block`, and reshapes them
 ## How scoring works
 
 `npm run score` runs `scripts/score.ts`, which runs every scorer in `test/spec.ts` on each myst-spec example that has MyST source.
-`raw` and `adapted` compare `parse()` and `toMystmd(parse())` with mystmd's parser, and `dropin` compares our `mystParse` with myst-parser's.
-`transformed` runs mystmd's directives and roles on `parse()`, and `ceiling` runs myst-parser's `mystParse`, and both compare with the spec's expected tree.
+[Score per file](index.md#score-per-file) says what each scorer counts.
 It writes each scorer's passing examples to `scoreboard.json`, and the data for the [score table](index.md#score-per-file) to `docs/data/`.
 `test/scoreboard.test.ts` fails if any example listed in `scoreboard.json` stops passing.
-CI runs `npm test`, `npm run typecheck`, `npm run build` and `npm run score`, and fails if `scoreboard.json` then differs from the committed file.
+CI also fails if `scoreboard.json` is out of date.
 
 ## To add a syntax
 
