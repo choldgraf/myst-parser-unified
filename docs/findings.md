@@ -6,7 +6,7 @@ It says what this parser found, what an adapter from its tree to mystmd's covers
 ## Why exact positions matter
 
 Editors, language servers and source maps need the line and column of every node.
-mystmd's markdown-it parser records line numbers for blocks, but no columns inside a line ([mystmd#2864](https://github.com/jupyter-book/mystmd/issues/2864)).
+mystmd's markdown-it parser [records line numbers for blocks, but no columns inside a line](https://github.com/jupyter-book/mystmd/issues/2864).
 [mystmd-lsp's design doc](https://github.com/choldgraf/mystmd-lsp/blob/main/docs/design.md) lists where that leaves positions missing or wrong, like on roles.
 Directive transforms also drop `position` on the figure and table containers they create ([myst-author upstream asks](https://github.com/choldgraf/myst-author/blob/main/upstream/README.md#data-and-packaging-gaps-candidates-for-small-fixes)).
 
@@ -92,11 +92,11 @@ Speed enough to parse every project page
 
 ## What it needs upstream
 
-- Column positions in mystmd's parser ([mystmd#2864](https://github.com/jupyter-book/mystmd/issues/2864)).
-- A unified-native parser for mystmd ([mystmd#1705](https://github.com/jupyter-book/mystmd/issues/1705)).
-- myst-spec as a conformance suite that other parsers reuse ([mystmd#3078](https://github.com/jupyter-book/mystmd/issues/3078)).
+- [Column positions in mystmd's parser](https://github.com/jupyter-book/mystmd/issues/2864).
+- [A unified-native parser for mystmd](https://github.com/jupyter-book/mystmd/issues/1705).
+- [myst-spec as a conformance suite that other parsers reuse](https://github.com/jupyter-book/mystmd/issues/3078).
 - An mdast adapter in mystmd, myst-author's proposal U10 ([myst-author upstream asks](https://github.com/choldgraf/myst-author/blob/main/upstream/README.md)).
-- myst-parser exporting `applyDirectives` and `applyRoles`, or accepting a custom tokenizer, so `mystParse` doesn't need an exact pin (not filed yet, related to [mystmd#1705](https://github.com/jupyter-book/mystmd/issues/1705)).
+- myst-parser exporting `applyDirectives` and `applyRoles`, or accepting a custom tokenizer, so `mystParse` doesn't need an exact pin. Not filed yet, but [related to the unified-native parser issue](https://github.com/jupyter-book/mystmd/issues/1705).
 
 ## Where it could go next
 
