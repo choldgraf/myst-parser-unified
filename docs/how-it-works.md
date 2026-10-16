@@ -5,14 +5,14 @@ Every position comes from micromark: each token records where it starts and ends
 
 ```{mermaid}
 flowchart LR
-  src["Markdown string"] --> syntax["micromark, with the micromark extension from each syntax module"]
-  syntax -->|tokens| from["mdast-util-from-markdown, with each module's mdast extension"]
-  from --> raw["raw tree, from parse() in src/parse.ts"]
-  raw --> adapt["toMystmd() in src/mystmd.ts"]
+  src["Markdown source"] --> syntax["micromark extensions"]
+  syntax -->|tokens| from["mdast extensions"]
+  from --> raw["raw tree"]
+  raw --> adapt["toMystmd()"]
   adapt --> adapted["adapted tree"]
-  adapted --> apply["applyDirectives and applyRoles from myst-parser"]
-  apply --> out["mystParse() output, from src/mystParse.ts"]
-  ref["mystmd's parser and myst-spec's expected trees"] -.-> score["scorers in test/spec.ts, run by scripts/score.ts"]
+  adapted --> apply["myst-parser directives and roles"]
+  apply --> out["mystParse() output"]
+  ref["mystmd's tree and myst-spec's tree"] -.-> score["scorers"]
   raw -.-> score
   adapted -.-> score
   out -.-> score
@@ -50,16 +50,18 @@ CI also fails if `scoreboard.json` is out of date.
 4. If the tree can't match mystmd's, say why in [Differences from mystmd](differences.md).
 5. Run `npm run score`, and commit the updated `scoreboard.json`.
 
-Then check [What must stay in sync by hand](index.md#what-must-stay-in-sync-by-hand) for anything else the syntax touches.
+Some rules are copied from mystmd by hand, so change both sides together:
+
+- The citation regexes in `src/citations.ts`, copied from `markdown-it-myst/dist/citations.js`.
+- The label characters in `src/blocks.ts`, from mystmd's `TARGET_PATTERN`.
+- The math rules in `src/math.ts`, from mystmd's dollarmath and amsmath plugins and `myst-common`'s `normalizeLabel`.
+- The characters inside braces in `src/shared.ts`, from `markdown-it-myst/dist/inlineAttributes.js`.
+- The `myst-ext-*` extensions in `test/spec.ts` and `package.json`, from mystmd-client's `parse.ts`.
+- The `myst-parser` pin in `package.json`, and the files `src/mystParse.ts` loads from it.
 
 ## The modules
 
-The parser is `mdast-util-from-markdown` with extensions for MyST.
-micromark splits the source into tokens, and `mdast-util-from-markdown` turns those tokens into an mdast tree.
-Each of `src/roles.ts`, `src/directives.ts`, `src/blocks.ts`, `src/citations.ts`, `src/definitionLists.ts` and `src/math.ts` exports two extensions.
-The micromark extension tells micromark how to find the syntax.
-The mdast extension builds the same nodes that mystmd's parser builds.
-
+Each syntax module in `src/` exports a micromark extension that finds the syntax and an mdast extension that builds the nodes mystmd's parser builds.
 [`src/parse.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/parse.ts) puts them together with micromark's extensions for front matter, GFM footnotes, GFM tables and GFM task lists, as `parse()` and the `remarkMyst` plugin.
 `toMystmd()` in [`src/mystmd.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/src/mystmd.ts) changes that tree into the shape mystmd's parser builds.
 [Differences from mystmd](differences.md) lists what it changes.

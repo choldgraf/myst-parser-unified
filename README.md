@@ -10,7 +10,7 @@ To measure that, we parse the MyST in each [`myst-spec`](https://github.com/jupy
 The passing examples are in [`scoreboard.json`](scoreboard.json).
 
 **Score: 65 of 90 MyST examples match**, from `npm run score`.
-[What we learned](docs/findings.md#measured-results) has the other scores, and a comparison on real MyST projects.
+[Score per file](docs/index.md#score-per-file) has the other scores, and [What we learned](docs/findings.md#measured-results) has a comparison on real MyST projects.
 
 ## What we found
 
@@ -20,13 +20,6 @@ They fail because mystmd's tree isn't plain mdast: it uses curly quotes, sets li
 `toMystmd` fixes most of those, but not curly quotes or bare URLs.
 [The differences page](docs/differences.md) lists them.
 The CommonMark spec examples, scored separately, mostly measure where markdown-it and micromark differ.
-
-The docs cover:
-
-- [How the parser works](docs/how-it-works.md): one micromark extension per MyST syntax.
-- [What we learned](docs/findings.md): what this parser found, and what blocks mystmd from switching.
-- [Why examples fail](docs/differences.md): what `toMystmd` changes, and what it can't.
-- [What was hard about micromark](docs/how-it-works.md#notes-on-micromark).
 
 ## Use it
 
@@ -55,10 +48,7 @@ import { mystParse } from 'myst-parser-unified/mystmd';
 const tree = mystParse(src, { directives, roles, vfile, markdownit: { linkify: true } });
 ```
 
-It runs mystmd's directives and roles, which aren't part of myst-parser's public API.
-So it needs `myst-parser` at the version pinned in `package.json`, as a peer dependency.
-Other versions may move or change the files it loads.
-It only runs in Node.
+It runs mystmd's own directives and roles, so it needs the `myst-parser` version pinned in `package.json` as a peer dependency, and it only runs in Node.
 The main entry doesn't need `myst-parser`.
 [The differences page](docs/differences.md#mystparse) says what it doesn't do the same.
 
@@ -74,24 +64,8 @@ You need Node 24 or later, which runs the TypeScript files directly.
 - `npm run score -- "directives.figure"`: show why the first three examples whose ID contains that text don't match mystmd's tree.
   This compares the raw tree, before `toMystmd`.
 - `MYST_CORPUS=<folder> npm run corpus`: compare both parsers on every `.md` file in a folder of MyST projects.
-- `npm test`: check that positions are exact, that syntax edge cases parse like mystmd's parser, that `mystParse` writes the same messages as mystmd's, and that every example in `scoreboard.json` still passes.
+- `npm test`: run the tests.
 - `npm run typecheck`: check the types with TypeScript.
 - `npm run build`: write JavaScript and type declarations to `dist/`.
 - `npm run docs`: score, then build the [docs site](https://chrisholdgraf.com/myst-parser-unified/).
 - `npm run docs:live`: score, then serve the site locally.
-
-## What must stay in sync by hand
-
-Nothing checks these, so change both sides together:
-
-- The citation regexes in `src/citations.ts`, copied from `markdown-it-myst/dist/citations.js`.
-- The label characters in `src/blocks.ts`, from mystmd's `TARGET_PATTERN`.
-- The math rules in `src/math.ts`, from `markdown-it-dollarmath`, `markdown-it-amsmath` and `myst-common`'s `normalizeLabel`.
-- The characters inside braces in `src/shared.ts`, from `markdown-it-myst/dist/inlineAttributes.js`.
-- The options and `myst-ext-*` extensions in `test/spec.ts` and `package.json`, from mystmd-client's `parse.ts`.
-- The scorer names in `test/spec.ts` and the `labels` in `scripts/score.ts`, and the columns in `docs/index.md` and `scoreboard.json`.
-- The numbers in this README, `docs/differences.md` and `docs/findings.md`, from `npm run score` and `npm run corpus`.
-  CI checks only `scoreboard.json`.
-- The `myst-parser` 1.7.4 pin in `package.json` (peer and dev), and the files `src/mystParse.ts` and `test/mystParse.test.ts` require from myst-parser's folder.
-- The mdast node types in `src/parse.ts`, and the nodes each `*FromMarkdown` builds.
-- The syntax list in `docs/how-it-works.md`, and the `syntaxes` array in `src/parse.ts`.

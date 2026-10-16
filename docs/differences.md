@@ -12,8 +12,6 @@ Each difference says whether `toMystmd` handles it.
 [`test/spec.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/spec.ts) parses each myst-spec example's source with our parser and with mystmd's `tokensToMyst`, and compares the two trees.
 Both trees are from before directives and roles run, so they have generic `mystDirective` and `mystRole` nodes.
 We run mystmd's parser with `myst build`'s options: mystmd's defaults, which include smartquotes, plus linkify.
-A directive's nested parse turns on markdown-it's replacements, like `--` to `–`, for every later parse with the same parser.
-`myst build` makes a new parser for each file, so it never replaces anything, and we turn replacements back off after each parse.
 
 `normalize()` ignores:
 
@@ -147,12 +145,7 @@ Inline options, like ```` ```{note .a #b key=value} ````, parse like mystmd's, w
 - mystmd parses the value of a directive's `key=value` twice, so the option's text is doubled, like `valuevalue`.
   Its `value` and the directive's `options` are right, and a role's option text isn't doubled.
   Here the text is there once.
-- mystmd builds a `mystDirectiveError` or `mystRoleError` for these, and here they stay a code block or text:
-  - `{ }`.
-  - a second name, like `{note a b}`.
-  - a word mystmd doesn't know, like `.a.b` or `k='v'`.
-  - a second `#id`, or an id that starts with a digit.
-  - a role without a name, like `` {.a}`x` ``.
+- mystmd builds a `mystDirectiveError` or `mystRoleError` for a malformed header, like `{ }` or `{note a b}`, and here it stays a code block or text.
 - `key=""` is an empty `key` option with no `mystOption` node in mystmd, and here the braces aren't a directive or role.
 - A quoted value can't have backticks here, even in a colon fence or a role, where mystmd allows them.
 
@@ -169,11 +162,10 @@ Columns aren't compared, but they also match on every passing `dropin` example, 
 They can differ elsewhere, because markdown-it has no column data for blocks and nested parses, so mystmd puts some messages at column 1.
 For example, for a role in a `list-table` cell, mystmd says column 1 and ours says the real column.
 
-The counts below come from the `adapted` and `dropin` lists in `scoreboard.json`, which `npm run score` writes.
-Every example that fails also fails with `toMystmd`.
-The one MyST failure is smartquotes.
-Six MyST examples that fail with `toMystmd` pass here, because the directive throws away the part that differed, like a figure's linkified argument.
-mystmd writes messages on three examples, for an unknown directive or role, and ours are the same.
+Every example that fails here also fails with `toMystmd`.
+The only MyST failure is smartquotes.
+Some MyST examples that fail with `toMystmd` pass here, because the directive throws away the part that differed, like a figure's linkified argument.
+Where mystmd writes a message, for an unknown directive or role, ours is the same.
 [`test/mystParse.test.ts`](https://github.com/choldgraf/myst-parser-unified/blob/main/test/mystParse.test.ts) checks a few more: option errors, nested directives, and roles in directive bodies and `list-table` cells.
 
 What it doesn't do the same:
