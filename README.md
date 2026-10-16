@@ -9,7 +9,7 @@ This repo tests how hard it would be to parse MyST with micromark instead.
 To measure that, we parse the MyST in each [`myst-spec`](https://github.com/jupyter-book/mystmd/tree/main/packages/myst-spec/docs/examples) example with our parser and with mystmd's, and compare the two [mdast](https://github.com/syntax-tree/mdast) trees.
 The passing examples are in [`scoreboard.json`](scoreboard.json).
 
-**Score: 65 of 90 MyST examples match**, from `npm run score`.
+**Score: 65 of 90 MyST examples match** mystmd's tree straight from the parser, from `npm run score`.
 [Score per file](docs/index.md#score-per-file) has the other scores, and [What we learned](docs/findings.md#measured-results) has a comparison on real MyST projects.
 
 ## What we found
@@ -19,12 +19,12 @@ No example fails because of how MyST syntax is parsed.
 They fail because mystmd's tree isn't plain mdast: it uses curly quotes, sets list `spread` differently, turns bare URLs into links, nests content in `block` nodes, and so on.
 `toMystmd` fixes most of those, but not curly quotes or bare URLs.
 [The differences page](docs/differences.md) lists them.
-The CommonMark spec examples, scored separately, mostly measure where markdown-it and micromark differ.
+myst-spec also includes the CommonMark spec examples, scored separately, and those mostly measure where markdown-it and micromark differ.
 
 ## Use it
 
 It isn't on npm, so install it with `npm install github:choldgraf/myst-parser-unified`.
-Installing it builds the JavaScript in `dist/` with `npm run build`.
+`npm install` runs the build for you.
 
 `parse(src)` returns an mdast tree, and the `remarkMyst` plugin adds the same MyST syntax to remark.
 `toMystmd(tree)` changes a tree, in place, into mystmd's shape:

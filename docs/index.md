@@ -10,10 +10,14 @@ title: myst-parser-unified
 ## Score per file
 
 Each row is a `myst-spec` example file, and the last three rows are the MyST, CommonMark and combined totals.
-`raw` counts examples that match mystmd's tree before directives and roles run, and `adapted` counts the same after [`toMystmd`](differences.md).
-`transformed` counts examples that match the spec's tree after directives and roles run.
-`dropin` counts examples where our [`mystParse`](differences.md#mystparse) gives the same tree and messages as mystmd's.
-`ceiling` counts examples where myst-parser's own `mystParse` matches the spec's tree.
+Each column counts the examples that match:
+
+- `raw`: mystmd's tree straight from the parser.
+- `adapted`: the same, after [`toMystmd`](differences.md).
+- `transformed`: the spec's tree, after directives and roles run.
+- `dropin`: mystmd's tree and messages, from our [`mystParse`](differences.md#mystparse).
+- `ceiling`: the spec's tree, from myst-parser's own `mystParse`.
+
 The numbers come from the last `npm run score`.
 
 :::{listing}

@@ -8,7 +8,7 @@ It says what this parser found, what an adapter from its tree to mystmd's covers
 Editors, language servers and source maps need the line and column of every node.
 mystmd's markdown-it parser [records line numbers for blocks, but no columns inside a line](https://github.com/jupyter-book/mystmd/issues/2864).
 [mystmd-lsp's design doc](https://github.com/choldgraf/mystmd-lsp/blob/main/docs/design.md) lists where that leaves positions missing or wrong, like on roles.
-Directive transforms also [drop `position` on the figure and table containers they create](https://github.com/choldgraf/myst-author/blob/main/upstream/README.md#data-and-packaging-gaps-candidates-for-small-fixes).
+Directive transforms also [drop `position` on the figure and table containers they create](https://github.com/choldgraf/myst-author/blob/main/upstream/README.md#data-and-packaging-gaps-file-as-small-bug-reports).
 
 Tools work around this.
 mystmd-client's `parseMyst`, which [mystmd-lsp](https://github.com/choldgraf/mystmd-lsp) calls, copies a directive's position onto its children before transforms run.
@@ -21,7 +21,7 @@ The [`mystParse` section](differences.md#mystparse) has a case where mystmd repo
 ## Measured results
 
 `npm run score` scores the myst-spec examples five ways, and [Score per file](index.md#score-per-file) has the numbers and what each one counts.
-The `ceiling` score is a ceiling for `transformed`, because the spec is older than mystmd's parser.
+The `ceiling` score is a ceiling for `transformed`, because where myst-parser itself disagrees with the spec we can't do better.
 Most of the MyST examples this parser misses after directives and roles are ones myst-parser misses too: figures, tables, block breaks, comments, and options typed as numbers.
 Comparing the `transformed` and `ceiling` lists in `scoreboard.json` shows which.
 
@@ -35,7 +35,7 @@ Our folder held the docs of [mystmd](https://github.com/jupyter-book/mystmd/tree
 | Trees matching mystmd's with `toMystmd` | 290 |
 | Median parse time per file, ours and mystmd's | about 0.4 ms and 0.2 ms |
 
-Start lines agree with mystmd's on fewer than half the files, because markdown-it gives inline nodes on later lines of a paragraph the paragraph's line.
+markdown-it gives inline nodes on later lines of a paragraph the paragraph's line, so start lines only agree with mystmd's on fewer than half the files.
 
 ## What an adapter covers, and what it can't
 

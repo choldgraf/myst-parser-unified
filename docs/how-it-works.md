@@ -32,7 +32,7 @@ Positions come from micromark's tokens, so the role starts at line 2, column 4, 
 `toMystmd()` sets the list item's `spread` to `true`, like mystmd.
 On other input it renames nodes, like `blockBreak` to `block`, and reshapes them, like turning link references into links.
 `applyRoles` runs the `sub` role, which swaps the `mystRoleBody` for a `subscript` node and drops `processed: false`.
-`applyDirectives` has nothing to do here, and the target is left for mystmd's later transforms.
+`applyDirectives` has nothing to do here, and mystmd resolves the target in a later pass, outside this parser.
 
 ## How scoring works
 
