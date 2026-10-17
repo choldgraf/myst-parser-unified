@@ -22,7 +22,8 @@ The [`mystParse` section](differences.md#mystparse) has a case where mystmd repo
 
 `npm run score` scores the myst-spec examples five ways, and [Score per file](index.md#score-per-file) has the numbers and what each one counts.
 The `ceiling` score is a ceiling for `transformed`, because where myst-parser itself disagrees with the spec we can't do better.
-Most of the MyST examples this parser misses after directives and roles are ones myst-parser misses too: figures, tables, block breaks, comments, and options typed as numbers.
+Most of the MyST examples this parser misses after directives and roles are ones myst-parser misses too.
+Comparing the `transformed` and `ceiling` lists in `scoreboard.json` shows which.
 Comparing the `transformed` and `ceiling` lists in `scoreboard.json` shows which.
 
 `MYST_CORPUS=<folder> npm run corpus` compares both parsers on every `.md` file in a local folder, skipping dot-folders and `_build`.

@@ -255,6 +255,7 @@ function tokenizeDirective(this: TokenizeContext, effects: Effects, ok: State, n
 
 // A colon fence without `{name}`, like `:::note`, is a code block in mystmd, so it's a `codeFenced` here too.
 // micromark's own `codeFenced` only takes backticks and tildes, so this is a copy of it for colons.
+// Its production build would accept a colon marker, but its dev build, which the tests load, asserts on it, so it can't be reused.
 const colonCode: Construct = { name: 'colonCode', tokenize: tokenizeColonCode, concrete: true };
 
 function tokenizeColonCode(this: TokenizeContext, effects: Effects, ok: State, nok: State): State {
